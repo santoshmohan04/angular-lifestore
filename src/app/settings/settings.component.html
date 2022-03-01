@@ -1,0 +1,94 @@
+<div class="container" style="padding: 20px;">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-pills card-header-pills">
+                <li class="nav-item">
+                    <a href="#messages" class="nav-link active" data-bs-toggle="tab">Change Password</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#home" class="nav-link" data-bs-toggle="tab" id="usrords">Orders</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#profile" class="nav-link" data-bs-toggle="tab" id="prfl">Profile</a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="messages">
+                    <h5 class="card-title">Change Password</h5>
+                    <div class="card-text">
+                        <div class="alert alert-danger" *ngIf="error">
+                            <p>{{ error }}</p>
+                        </div>
+                        <div *ngIf="isLoading" style="text-align: center;">
+                            <app-loading-spinner></app-loading-spinner>
+                        </div>
+                        <form #chngpswdForm="ngForm" (ngSubmit)="onChange(chngpswdForm)" *ngIf="!isLoading">
+                            <div class="mb-3">
+                                <label for="email">Enter new Password</label>
+                                <input type="password" class="form-control" name="newpswd" id="newpswd" ngModel required minlength="6">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email">Conform the Password</label>
+                                <input type="password" class="form-control" name="repswd" id="repswd" ngModel required minlength="6">
+                            </div>
+                            <button type="submit" name="chngpsw" class="btn btn-primary" [disabled]="!chngpswdForm.valid">Change</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="home">
+                    <div *ngIf="itemDates">
+                        <div *ngFor="let y of itemDates; let i = index">
+                            <div class="accordion" [attr.id]="'accordionExample' + i">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" [attr.id]="'heading' + i">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse' + i" aria-expanded="true" [attr.aria-controls]="'collapse' + i">
+                                            Ordered Data & Time: {{ y }}
+                                        </button>
+                                    </h2>
+                                    <div [attr.id]="'collapse' + i" class="accordion-collapse collapse" [attr.aria-labelledby]="'heading' + i" [attr.data-bs-parent]="'#accordionExample' + i">
+                                        <div class="accordion-body">
+                                            <table class="table table-striped table-hover">
+                                                <thead class='table-dark'>
+                                                    <tr>
+                                                        <th>Item Id</th>
+                                                        <th>Image</th>
+                                                        <th>Item Name</th>
+                                                        <th>Price</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody >
+                                                    <tr *ngFor="let x of userItems[i]">    
+                                                        <td>{{ x.id }}</td>
+                                                        <td><img src="assets/{{x.image}}" alt={{x.name}} class="card-img-top" height="60px"></td>
+                                                        <td>{{ x.name }}</td>
+                                                        <td>Rs.{{ x.price }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="profile">
+                    <h3 style="text-align: center; color: blue;">User Profile</h3>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <img src="{{'assets/img/dummy-user.png'}}" alt="{{ userName }}" height="120px">
+                        </div>
+                        <div class="col-sm-9">
+                            <p>Hello: <strong>{{(userName) ? userName : 'User'}}</strong></p>
+                            <p>User ID: <strong>{{userId}}</strong></p>
+                            <p>Email: <strong>{{userEmail}}</strong></p>
+                            <p>Email Verified: <strong>{{userReg}}</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

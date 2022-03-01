@@ -1,0 +1,55 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-sm-6 home-feature">
+            <h3>LIVE SUPPORT</h3>
+            <p style='color: green'>24 hours | 7 days a week | 365 days a year Live Technical Support</p>
+            <p>Our Support Team is available, you can reach us by any of the below mentioned modes.</p>
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3>CONTACT US</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="alert alert-danger" *ngIf="error">
+                        <p>{{ error }}</p>
+                    </div>
+                    <div *ngIf="isLoading" style="text-align: center;">
+                        <app-loading-spinner></app-loading-spinner>
+                    </div>
+                    <form #contactForm="ngForm" (ngSubmit)="onContact(contactForm)" *ngIf="!isLoading">
+                        <div class="mb-3">
+                            <label for = "usrname">Name</label>
+                            <input class="form-control" name="usrname" id="usrname" type="text" ngModel required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="usreml">Email</label>
+                            <input type="email" name="usreml" id="usreml" class="form-control" ngModel email required>
+                        </div>
+                        <div class="mb-3">
+                              <label for = "mssg">Message</label>
+                              <textarea class="form-control" type="text" name="mssg" id="mssg" rows="6" ngModel required></textarea>
+                        </div>   
+                        <button class="btn btn-primary" type="submit" name="cntusform" [disabled]="!contactForm.valid">Submit</button><br><br>
+                    </form>
+                </div>
+            </div>   
+        </div>
+        <div class="col-md-6 col-sm-6 home-feature">
+            <img src="assets/img/contact.png" alt="Who we are"><br><br>
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3>Company Information</h3>
+                </div>
+                <div class="panel-body">
+                    <dl>
+                        <dt>Address:</dt>
+                        <dd>New York, NY 10012, US</dd><br>
+                        <dt>Phone:</dt>
+                        <dd>Office - 01 234 567 88, 01 234 567 89.</dd><br>
+                        <dt>Email:</dt>
+                        <dd><a href = "mailto:  info@example.com ">info@example.com </a></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
