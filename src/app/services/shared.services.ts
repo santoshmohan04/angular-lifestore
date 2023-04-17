@@ -35,6 +35,18 @@ export class SharedService {
     );
   }
 
+  getUserOrders() {
+    let Url = this.url + '/userords.json';
+    return this.http.get(Url).pipe(
+      map((res: any) => {
+        return res;
+      }),
+      catchError((error) => {
+        throw new Error(error.error);
+      })
+    );
+  }
+
   clearCart() {
     let Url = this.url + '/cartitems.json';
     return this.http.delete(Url).pipe(

@@ -10,7 +10,6 @@ import { MainpageComponent } from './mainpage/mainpage.component';
 import { ProductsComponent } from './products/products.component';
 import { SettingsComponent } from './settings/settings.component';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgPipesModule } from 'ngx-pipes';
 import { DatePipe } from '@angular/common';
 import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
 import { AuthInterceptorService } from './auth-interceptor.service';
@@ -24,6 +23,9 @@ import {
 import { AlertsComponent } from './alerts/alerts.component';
 import { AlertMessageService } from './alerts/alertmsg.service';
 import { SharedService } from './services/shared.services';
+import { CartComponent } from './cart/cart.component';
+import { AuthGuard } from './auth.guard';
+import { AuthService } from './auth.service';
 
 @NgModule({
   declarations: [
@@ -37,6 +39,7 @@ import { SharedService } from './services/shared.services';
     LoadingSpinnerComponent,
     ContactComponent,
     LoginComponent,
+    CartComponent,
   ],
   imports: [
     BrowserModule,
@@ -45,17 +48,18 @@ import { SharedService } from './services/shared.services';
     AppRoutingModule,
     HttpClientModule,
     NgbDropdownModule,
-    NgPipesModule,
     NgbModule,
     NgbCollapseModule,
   ],
   providers: [
-    DatePipe,
+    AuthService,
+    AuthGuard,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptorService,
       multi: true,
     },
+    DatePipe,
     AlertMessageService,
     SharedService,
   ],
