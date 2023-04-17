@@ -22,8 +22,7 @@ export class AuthService {
   user = new BehaviorSubject<User>(null);
   private tokenExpirationTimer: any;
 
-  constructor(private http: HttpClient, 
-              private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   signup(email: string, password: string) {
     return this.http
@@ -32,12 +31,12 @@ export class AuthService {
         {
           email: email,
           password: password,
-          returnSecureToken: true
+          returnSecureToken: true,
         }
       )
       .pipe(
         catchError(this.handleError),
-        tap(resData => {
+        tap((resData) => {
           this.handleAuthentication(
             resData.email,
             resData.displayName,
@@ -57,12 +56,12 @@ export class AuthService {
         {
           email: email,
           password: password,
-          returnSecureToken: true
+          returnSecureToken: true,
         }
       )
       .pipe(
         catchError(this.handleError),
-        tap(resData => {
+        tap((resData) => {
           this.handleAuthentication(
             resData.email,
             resData.displayName,
@@ -75,29 +74,29 @@ export class AuthService {
       );
   }
 
-  chngpswd(confPswd:string) {
+  chngpswd(confPswd: string) {
     return this.http
-    .post<AuthResponseData>(
-      'https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyBYCyK5h9tFRHN3M2gSnSc6nYLPtdOYkC0',
-      {
-        idToken: this.user.value.token,
-        password: confPswd,
-        returnSecureToken: true
-      }
-    )
-    .pipe(
-      catchError(this.handleError),
-      tap(resData => {
-        this.handleAuthentication(
-          resData.email,
-          resData.displayName,
-          resData.localId,
-          resData.registered,
-          resData.idToken,
-          +resData.expiresIn
-        );
-      })
-    );
+      .post<AuthResponseData>(
+        'https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyBYCyK5h9tFRHN3M2gSnSc6nYLPtdOYkC0',
+        {
+          idToken: this.user.value.token,
+          password: confPswd,
+          returnSecureToken: true,
+        }
+      )
+      .pipe(
+        catchError(this.handleError),
+        tap((resData) => {
+          this.handleAuthentication(
+            resData.email,
+            resData.displayName,
+            resData.localId,
+            resData.registered,
+            resData.idToken,
+            +resData.expiresIn
+          );
+        })
+      );
   }
 
   autoLogin() {
@@ -156,7 +155,14 @@ export class AuthService {
     expiresIn: number
   ) {
     const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
-    const user = new User(email, userId, displayName, registered, token, expirationDate);
+    const user = new User(
+      email,
+      userId,
+      displayName,
+      registered,
+      token,
+      expirationDate
+    );
     this.user.next(user);
     this.autoLogout(expiresIn * 1000);
     localStorage.setItem('userData', JSON.stringify(user));
@@ -165,7 +171,7 @@ export class AuthService {
   private handleError(errorRes: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred!';
     if (!errorRes.error || !errorRes.error.error) {
-      return throwError(errorMessage);
+      return throwError(() => new Error(errorMessage));
     }
     switch (errorRes.error.error.message) {
       case 'EMAIL_EXISTS':
@@ -178,6 +184,6 @@ export class AuthService {
         errorMessage = 'This password is not correct.';
         break;
     }
-    return throwError(errorMessage);
+    return throwError(() => new Error(errorMessage));
   }
 }
