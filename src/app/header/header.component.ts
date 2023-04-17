@@ -1,191 +1,125 @@
 import { DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
-
-import { AuthService, AuthResponseData } from '../auth.service';
-import { SimpleService } from '../simple.service';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { AuthService } from '../auth.service';
+import { SharedService } from '../services/shared.services';
+import { AlertMessageService } from '../alerts/alertmsg.service';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.css'],
 })
-export class HeaderComponent implements OnInit, OnDestroy {
+export class HeaderComponent implements OnInit {
   isAuthenticated = false;
-  private userSub: Subscription;
-  cartKeys:any = [];
-  cartValues:any = [];
-  total:number = 0;
-  ordmsg:string = "";
+  cartKeys: any = [];
+  cartValues: any = [];
+  total: number = 0;
+  ordmsg: string = '';
   ordDate = new Date();
   isLoading = false;
-  error: string = null;
-  userEmail: string = "";
-  
+  isCollapsed = false;
+  userEmail: string = '';
+  @ViewChild('logout') logout: NgbModal;
 
-  constructor(private http: HttpClient, 
-    private datepipe: DatePipe, 
-    private authService: AuthService, 
-    private router: Router,
-    public simpleService: SimpleService) { }
-
-    
+  constructor(
+    private datepipe: DatePipe,
+    private alertMsg: AlertMessageService,
+    private authService: AuthService,
+    private modalService: NgbModal,
+    private shareService: SharedService
+  ) {}
 
   ngOnInit(): void {
-    this.simpleService.loginModal = "none";
-    this.simpleService.signupModal = "none";
-    this.userSub = this.authService.user.subscribe(user => {
-      this.isAuthenticated = !!user;
-      console.log(!user);
-      console.log(!!user);
+    this.authService.getUserInfo();
+    this.authService.user.subscribe({
+      next: (value) => {
+        let user_data = value;
+        this.userEmail = user_data?.email;
+        user_data
+          ? (this.isAuthenticated = true)
+          : (this.isAuthenticated = false);
+      },
+      error: (err) => {
+        this.alertMsg.alertDanger(err);
+      },
     });
+    console.log(this.isAuthenticated);
+  }
+
+  openVerticallyCentered(content) {
+    if (content === 'mycart') {
+      this.cartItems();
+      this.modalService.open(content, { size: 'xl' });
+    } else {
+      this.modalService.open(content, { size: 'lg' });
+    }
   }
 
   cartItems() {
-    this.http
-      .get(
-        'https://e-store-23dd9.firebaseio.com/cartitems.json'
-      )
-      .subscribe((responseData) => {
+    this.shareService.getCartItems().subscribe({
+      next: (responseData) => {
         console.log(responseData);
         this.cartKeys = Object.keys(responseData);
         this.cartValues = Object.values(responseData);
-        for(let j=0;j<this.cartValues.length;j++){   
-          this.total += parseFloat(this.cartValues[j].price)  
+        for (let j = 0; j < this.cartValues.length; j++) {
+          this.total += parseFloat(this.cartValues[j].price);
         }
-      });
-  }
-
-  rmCart(x) {
-    const index = this.cartValues.indexOf(x);
-    this.cartValues.splice(index, 1);
-    this.total = this.total - x.price;
-    // console.log(x);
-    // console.log(this.cartKeys.at(index));
-    let cartid = this.cartKeys.at(index)
-    this.http
-      .delete(
-        'https://e-store-23dd9.firebaseio.com/cartitems/' + cartid + '.json'
-      ).subscribe((responseData) => {
-        // console.log(responseData);
-        if(responseData == null) {
-          alert('Removed from Cart');
-        }
-      });  
-  }
-
-  conformOrd() {
-
-    let ordData = {
-      'items': this.cartValues,
-      'orddate': this.datepipe.transform(this.ordDate, 'medium')
-    };
-    this.http.post('https://e-store-23dd9.firebaseio.com/userords.json', ordData
-    ).subscribe((responseData) => {
-      // console.log(responseData.hasOwnProperty('name'));
-      if(responseData.hasOwnProperty('name') == true) {
-        this.http.delete('https://e-store-23dd9.firebaseio.com/cartitems.json')
-        .subscribe((responseData) => {
-          // console.log(responseData);
-          if(responseData == null) {
-            this.cartKeys = false;
-            this.ordmsg = "Your order is confirmed. Thank you for shopping with us.";
-          }
-      });
-    }
+      },
+      error: (err: any) => {
+        console.log('err in getCartItems >>> ', err);
+      },
     });
   }
 
-  onSignup(form: NgForm) {
-    if (!form.valid) {
-      return;
-    }
-    const email = form.value.eml;
-    const password = form.value.pswd;
-
-    let authObs: Observable<AuthResponseData>;
-
-    this.isLoading = true;
-
-    authObs = this.authService.signup(email, password);
-
-    authObs.subscribe(
-      resData => {
-        console.log(resData);
-        this.userEmail = resData.email;
-        this.isLoading = false;
-        this.simpleService.signupModal = "none";
-        console.log(this.simpleService.signupModal);
-        this.router.navigate(['/products']);
+  rmCart(x: any) {
+    const index = this.cartValues.indexOf(x);
+    this.cartValues.splice(index, 1);
+    this.total = this.total - x.price;
+    let cartid = this.cartKeys.at(index);
+    this.shareService.removeCartItems(cartid).subscribe({
+      next: (responseData) => {
+        if (responseData == null) {
+          this.alertMsg.alertInfo('Removed from Cart');
+        }
       },
-      errorMessage => {
-        console.log(errorMessage);
-        this.error = errorMessage;
-        this.isLoading = false;
-      }
-    );
-
-    form.reset();
+      error: (err: any) => {
+        console.log('err in removeCartItems >>> ', err);
+      },
+    });
   }
 
-  onSignin(form: NgForm) {
-    if (!form.valid) {
-      return;
-    }
-    const email = form.value.email;
-    const password = form.value.password;
-
-    let authObs: Observable<AuthResponseData>;
-
-    this.isLoading = true;
-
-    authObs = this.authService.login(email, password);
-
-    authObs.subscribe(
-      resData => {
-        console.log(resData);
-        this.userEmail = resData.email;
-        this.isLoading = false;
-        this.simpleService.loginModal = "none";
-        this.router.navigate(['/products']);
+  conformOrd() {
+    let ordData = {
+      items: this.cartValues,
+      orddate: this.datepipe.transform(this.ordDate, 'medium'),
+    };
+    this.shareService.conformOrder(ordData).subscribe({
+      next: (responseData) => {
+        if (responseData.hasOwnProperty('name') === true) {
+          this.shareService.clearCart().subscribe({
+            next: (responseData) => {
+              if (responseData == null) {
+                this.cartKeys = false;
+                this.ordmsg =
+                  'Your order is confirmed. Thank you for shopping with us.';
+                this.modalService.dismissAll();
+              }
+            },
+            error: (err: any) => {
+              console.log('err in clearCart >>> ', err);
+            },
+          });
+        }
       },
-      errorMessage => {
-        console.log(errorMessage);
-        this.error = errorMessage;
-        this.isLoading = false;
-      }
-    );
-
-    form.reset();
-  }
-
-  onClose() {
-    this.simpleService.loginModal = "none";
-    this.error = null;
+      error: (err: any) => {
+        console.log('err in conformOrd >>> ', err);
+      },
+    });
   }
 
   onLogout() {
+    this.modalService.dismissAll();
     this.authService.logout();
-    this.error = null;
   }
-
-  ngOnDestroy() {
-    this.userSub.unsubscribe();
-  }
-
-  reqSignup() {
-    this.simpleService.signupModal = "block";
-    this.simpleService.loginModal = "none";
-  }
-
-  closeSignup() {
-    this.simpleService.signupModal = "none"
-    this.error = null;
-  }
-  
-
 }

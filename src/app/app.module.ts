@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -13,35 +13,52 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgPipesModule } from 'ngx-pipes';
 import { DatePipe } from '@angular/common';
 import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.component';
-import { SimpleService } from './simple.service';
 import { AuthInterceptorService } from './auth-interceptor.service';
 import { ContactComponent } from './contact/contact.component';
 import { LoginComponent } from './login/login.component';
+import {
+  NgbModule,
+  NgbCollapseModule,
+  NgbDropdownModule,
+} from '@ng-bootstrap/ng-bootstrap';
+import { AlertsComponent } from './alerts/alerts.component';
+import { AlertMessageService } from './alerts/alertmsg.service';
+import { SharedService } from './services/shared.services';
 
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
     FooterComponent,
+    AlertsComponent,
     MainpageComponent,
     ProductsComponent,
     SettingsComponent,
     LoadingSpinnerComponent,
     ContactComponent,
-    LoginComponent
+    LoginComponent,
   ],
   imports: [
     BrowserModule,
     FormsModule,
+    ReactiveFormsModule,
     AppRoutingModule,
     HttpClientModule,
-    NgPipesModule
+    NgbDropdownModule,
+    NgPipesModule,
+    NgbModule,
+    NgbCollapseModule,
   ],
-  providers: [DatePipe, SimpleService, {
-    provide: HTTP_INTERCEPTORS,
-    useClass: AuthInterceptorService,
-    multi: true
-  }],
-  bootstrap: [AppComponent]
+  providers: [
+    DatePipe,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptorService,
+      multi: true,
+    },
+    AlertMessageService,
+    SharedService,
+  ],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

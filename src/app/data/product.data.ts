@@ -7,6 +7,22 @@ export interface ProductCategories {
   image: string;
 }
 
+export interface Products {
+  cameras: Prodinfo[];
+  products: Prodinfo[];
+  shirts: Prodinfo[];
+  smartphones: Prodinfo[];
+  watches: Prodinfo[];
+}
+
+export interface Prodinfo {
+  id: string;
+  image: string;
+  name: string;
+  price?: string;
+  title?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })

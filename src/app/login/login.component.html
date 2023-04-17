@@ -1,78 +1,135 @@
 <div class="d-flex justify-content-center align-items-center mt-5">
   <div class="card">
-    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-      <li class="nav-item text-center">
-        <a
-          class="nav-link active btl"
-          id="pills-home-tab"
-          data-toggle="pill"
-          href="#pills-home"
-          role="tab"
-          aria-controls="pills-home"
-          aria-selected="true"
-          >Login</a
-        >
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+      <li class="text-center" [ngbNavItem]="1">
+        <button ngbNavLink>Login</button>
+        <ng-template ngbNavContent>
+          <form
+            [formGroup]="authForm"
+            (ngSubmit)="onlogin(authForm)"
+            *ngIf="!isLoading"
+          >
+            <div class="mb-3 mt-3 mx-3">
+              <label for="email">Email:</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                formControlName="userEmail"
+                placeholder="Enter email"
+                name="email"
+              />
+            </div>
+            <div class="mb-3 mx-3">
+              <label for="pwd">Password:</label>
+              <div class="input-group">
+                <input
+                  [type]="showPassword ? 'text' : 'password'"
+                  class="form-control"
+                  id="pwd"
+                  formControlName="userPswd"
+                  placeholder="Enter password"
+                  name="pswd"
+                />
+                <a
+                  class="input-group-text"
+                  (click)="showPassword = !showPassword"
+                >
+                  <em
+                    id="changePassIcon"
+                    [ngClass]="{
+                      'bi bi-eye': !showPassword,
+                      'bi bi-eye-slash': showPassword
+                    }"
+                  >
+                  </em>
+                </a>
+              </div>
+            </div>
+            <div class="form-check mb-3 mx-3">
+              <label class="form-check-label">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="remember"
+                  [(ngModel)]="isChecked"
+                  [ngModelOptions]="{ standalone: true }"
+                />
+                Remember me
+              </label>
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary mx-3 mb-3"
+              [disabled]="authForm.invalid"
+            >
+              Submit
+            </button>
+          </form>
+          <div *ngIf="isLoading" style="text-align: center">
+            <app-loading-spinner></app-loading-spinner>
+          </div>
+        </ng-template>
       </li>
-      <li class="nav-item text-center">
-        <a
-          class="nav-link btr"
-          id="pills-profile-tab"
-          data-toggle="pill"
-          href="#pills-profile"
-          role="tab"
-          aria-controls="pills-profile"
-          aria-selected="false"
-          >Signup</a
-        >
+      <li class="text-center" [ngbNavItem]="2">
+        <button ngbNavLink>Signup</button>
+        <ng-template ngbNavContent>
+          <form
+            [formGroup]="signupForm"
+            (ngSubmit)="onSignup(signupForm)"
+            *ngIf="!isLoading"
+          >
+            <div class="mb-3 mt-3 mx-3">
+              <label for="signupemail">Email:</label>
+              <input
+                type="email"
+                class="form-control"
+                id="signupemail"
+                formControlName="sigupEmail"
+                placeholder="Enter email"
+                name="email"
+              />
+            </div>
+            <div class="mb-3 mx-3">
+              <label for="signuppwd">Password:</label>
+              <div class="input-group">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="signuppwd"
+                  formControlName="signupPswd"
+                  placeholder="Enter password"
+                  name="pswd"
+                />
+                <a
+                  class="input-group-text"
+                  (click)="showPassword = !showPassword"
+                >
+                  <em
+                    id="changePassIcon"
+                    [ngClass]="{
+                      'bi bi-eye': !showPassword,
+                      'bi bi-eye-slash': showPassword
+                    }"
+                  >
+                  </em>
+                </a>
+              </div>
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary mx-3 mb-3"
+              [disabled]="signupForm.invalid"
+            >
+              Submit
+            </button>
+          </form>
+          <div *ngIf="isLoading" style="text-align: center">
+            <app-loading-spinner></app-loading-spinner>
+          </div>
+        </ng-template>
       </li>
     </ul>
-    <div class="tab-content" id="pills-tabContent">
-      <div
-        class="tab-pane fade show active"
-        id="pills-home"
-        role="tabpanel"
-        aria-labelledby="pills-home-tab"
-      >
-        <div class="form px-4 pt-5">
-          <input
-            type="text"
-            name=""
-            class="form-control"
-            placeholder="Email or Phone"
-          />
-
-          <input
-            type="text"
-            name=""
-            class="form-control"
-            placeholder="Password"
-          />
-          <button class="btn btn-dark btn-block">Login</button>
-        </div>
-      </div>
-      <div
-        class="tab-pane fade"
-        id="pills-profile"
-        role="tabpanel"
-        aria-labelledby="pills-profile-tab"
-      >
-        <div class="form px-4">
-          <input type="text" name="" class="form-control" placeholder="Name" />
-
-          <input type="text" name="" class="form-control" placeholder="Email" />
-
-          <input type="text" name="" class="form-control" placeholder="Phone" />
-
-          <input
-            type="text"
-            name=""
-            class="form-control"
-            placeholder="Password"
-          />
-
-          <button class="btn btn-dark btn-block">Signup</button>
-        </div>
-      </div>
-    </div>
+    <div [ngbNavOutlet]="nav" class="mt-2"></div>
   </div>
 </div>

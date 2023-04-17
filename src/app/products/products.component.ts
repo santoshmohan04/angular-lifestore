@@ -1,99 +1,93 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { AuthService } from '../auth.service';
+import { SharedService } from '../services/shared.services';
+import { Products } from '../data/product.data';
+import { AlertMessageService } from '../alerts/alertmsg.service';
 
 @Component({
   selector: 'app-products',
   templateUrl: './products.component.html',
-  styleUrls: ['./products.component.css']
+  styleUrls: ['./products.component.css'],
 })
 export class ProductsComponent implements OnInit {
-  prodlist:any = "";
-  cam:any = "";
-  st:any = "";
-  wt:any = "";
-  smph:any = "";
-  id:any = "";
-  image:any = "";
-  name:any = "";
-  price:any = "";
+  prodlist: any = '';
+  cam: any = '';
+  st: any = '';
+  wt: any = '';
+  smph: any = '';
+  isLoading = false;
 
-  constructor(private http: HttpClient,
-              private authService: AuthService) { }
+  constructor(
+    private alertMsg: AlertMessageService,
+    private shareService: SharedService
+  ) {}
 
   ngOnInit() {
-    this.http
-      .get(
-        'https://e-store-23dd9.firebaseio.com/prodlist.json'
-      )
-      .subscribe((responseData) => {
-        this.prodlist = responseData
+    this.isLoading = true;
+    let prod_data = localStorage.getItem('prodList');
+    if (prod_data) {
+      this.isLoading = false;
+      this.prodlist = JSON.parse(prod_data);
+      this.cam = this.prodlist.cameras;
+      this.st = this.prodlist.shirts;
+      this.wt = this.prodlist.watches;
+      this.smph = this.prodlist.smartphones;
+    } else {
+      this.productList();
+    }
+  }
+
+  productList() {
+    this.isLoading = true;
+    this.shareService.getProductList().subscribe({
+      next: (responseData: Products) => {
+        this.isLoading = false;
+        localStorage.setItem('prodList', JSON.stringify(responseData));
+        this.prodlist = responseData;
         this.cam = this.prodlist.cameras;
         this.st = this.prodlist.shirts;
         this.wt = this.prodlist.watches;
         this.smph = this.prodlist.smartphones;
-        console.log(responseData);
-      });
-  }
-
-  cameraCart(i) {
-    console.log(i);
-    this.id = this.cam[i].id;
-    this.image = this.cam[i].image;
-    this.name = this.cam[i].name;
-    this.price = this.cam[i].price;
-    let cartData = { id: this.id, image: this.image, name: this.name, price: this.price }
-    this.http.post('https://e-store-23dd9.firebaseio.com/cartitems.json', cartData)
-    .subscribe((responseData) => {
-      if(responseData.hasOwnProperty('name')) {
-        alert('Added to Cart');
-      }
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        this.alertMsg.alertDanger(err);
+      },
     });
   }
 
-  watchCart(i) {
-    console.log(i);
-    this.id = this.wt[i].id;
-    this.image = this.wt[i].image;
-    this.name = this.wt[i].name;
-    this.price = this.wt[i].price;
-    let cartData = { id: this.id, image: this.image, name: this.name, price: this.price }
-    this.http.post('https://e-store-23dd9.firebaseio.com/cartitems.json', cartData)
-    .subscribe((responseData) => {
-      if(responseData.hasOwnProperty('name')) {
-        alert('Added to Cart');
-      }
+  addtoCart(i: number, action: string) {
+    let cust_data = {
+      camera: {
+        id: this.cam[i].id,
+        image: this.cam[i].image,
+        name: this.cam[i].name,
+        price: this.cam[i].price,
+      },
+      watch: {
+        id: this.wt[i].id,
+        image: this.wt[i].image,
+        name: this.wt[i].name,
+        price: this.wt[i].price,
+      },
+      shirt: {
+        id: this.st[i].id,
+        image: this.st[i].image,
+        name: this.st[i].name,
+        price: this.st[i].price,
+      },
+      smartphone: {
+        id: this.smph[i].id,
+        image: this.smph[i].image,
+        name: this.smph[i].name,
+        price: this.smph[i].price,
+      },
+    };
+    this.shareService.addToCart(cust_data[action]).subscribe({
+      next: (responseData) => {
+        if (responseData.hasOwnProperty('name')) {
+          this.alertMsg.alertSuccess('Added to Cart');
+        }
+      },
     });
   }
-
-  shirtsCart(i) {
-    console.log(i);
-    this.id = this.st[i].id;
-    this.image = this.st[i].image;
-    this.name = this.st[i].name;
-    this.price = this.st[i].price;
-    let cartData = { id: this.id, image: this.image, name: this.name, price: this.price }
-    this.http.post('https://e-store-23dd9.firebaseio.com/cartitems.json', cartData)
-    .subscribe((responseData) => {
-      if(responseData.hasOwnProperty('name')) {
-        alert('Added to Cart');
-      }
-    });
-  }
-
-  smCart(i) {
-    console.log(i);
-    this.id = this.smph[i].id;
-    this.image = this.smph[i].image;
-    this.name = this.smph[i].name;
-    this.price = this.smph[i].price;
-    let cartData = { id: this.id, image: this.image, name: this.name, price: this.price }
-    this.http.post('https://e-store-23dd9.firebaseio.com/cartitems.json', cartData)
-    .subscribe((responseData) => {
-      if(responseData.hasOwnProperty('name')) {
-        alert('Added to Cart');
-      }
-    });
-  }
-
 }

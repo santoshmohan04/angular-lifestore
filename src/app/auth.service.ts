@@ -5,6 +5,8 @@ import { catchError, tap } from 'rxjs/operators';
 import { throwError, BehaviorSubject } from 'rxjs';
 
 import { User } from './user.model';
+import { environment } from 'src/environments/environment';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 export interface AuthResponseData {
   kind: string;
@@ -21,89 +23,87 @@ export interface AuthResponseData {
 export class AuthService {
   user = new BehaviorSubject<User>(null);
   private tokenExpirationTimer: any;
+  auth_url = environment.firebase_auth;
+  apiKey = environment.firebase_key;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private modal: NgbModal
+  ) {}
 
   signup(email: string, password: string) {
-    return this.http
-      .post<AuthResponseData>(
-        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBYCyK5h9tFRHN3M2gSnSc6nYLPtdOYkC0',
-        {
-          email: email,
-          password: password,
-          returnSecureToken: true,
-        }
-      )
-      .pipe(
-        catchError(this.handleError),
-        tap((resData) => {
-          this.handleAuthentication(
-            resData.email,
-            resData.displayName,
-            resData.localId,
-            resData.registered,
-            resData.idToken,
-            +resData.expiresIn
-          );
-        })
-      );
+    const url = this.auth_url + 'accounts:signUp?key=' + this.apiKey;
+    const payload = {
+      email: email,
+      password: password,
+      returnSecureToken: true,
+    };
+    return this.http.post<AuthResponseData>(url, payload).pipe(
+      catchError(this.handleError),
+      tap((resData) => {
+        this.handleAuthentication(
+          resData.email,
+          resData.displayName,
+          resData.localId,
+          resData.registered,
+          resData.idToken,
+          +resData.expiresIn
+        );
+      })
+    );
   }
 
   login(email: string, password: string) {
-    return this.http
-      .post<AuthResponseData>(
-        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBYCyK5h9tFRHN3M2gSnSc6nYLPtdOYkC0',
-        {
-          email: email,
-          password: password,
-          returnSecureToken: true,
-        }
-      )
-      .pipe(
-        catchError(this.handleError),
-        tap((resData) => {
-          this.handleAuthentication(
-            resData.email,
-            resData.displayName,
-            resData.localId,
-            resData.registered,
-            resData.idToken,
-            +resData.expiresIn
-          );
-        })
-      );
+    const url =
+      this.auth_url + 'accounts:signInWithPassword?key=' + this.apiKey;
+    const payload = {
+      email: email,
+      password: password,
+      returnSecureToken: true,
+    };
+    return this.http.post<AuthResponseData>(url, payload).pipe(
+      catchError(this.handleError),
+      tap((resData) => {
+        this.handleAuthentication(
+          resData.email,
+          resData.displayName,
+          resData.localId,
+          resData.registered,
+          resData.idToken,
+          +resData.expiresIn
+        );
+      })
+    );
   }
 
   chngpswd(confPswd: string) {
-    return this.http
-      .post<AuthResponseData>(
-        'https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyBYCyK5h9tFRHN3M2gSnSc6nYLPtdOYkC0',
-        {
-          idToken: this.user.value.token,
-          password: confPswd,
-          returnSecureToken: true,
-        }
-      )
-      .pipe(
-        catchError(this.handleError),
-        tap((resData) => {
-          this.handleAuthentication(
-            resData.email,
-            resData.displayName,
-            resData.localId,
-            resData.registered,
-            resData.idToken,
-            +resData.expiresIn
-          );
-        })
-      );
+    const url = this.auth_url + 'accounts:update?key=' + this.apiKey;
+    const payload = {
+      idToken: this.user.value.token,
+      password: confPswd,
+      returnSecureToken: true,
+    };
+    return this.http.post<AuthResponseData>(url, payload).pipe(
+      catchError(this.handleError),
+      tap((resData) => {
+        this.handleAuthentication(
+          resData.email,
+          resData.displayName,
+          resData.localId,
+          resData.registered,
+          resData.idToken,
+          +resData.expiresIn
+        );
+      })
+    );
   }
 
   autoLogin() {
     const userData: {
       email: string;
-      id: string;
       displayName: string;
+      id: string;
       registered: boolean;
       _token: string;
       _tokenExpirationDate: string;
@@ -114,8 +114,8 @@ export class AuthService {
 
     const loadedUser = new User(
       userData.email,
-      userData.id,
       userData.displayName,
+      userData.id,
       userData.registered,
       userData._token,
       new Date(userData._tokenExpirationDate)
@@ -130,10 +130,18 @@ export class AuthService {
     }
   }
 
+  getUserInfo() {
+    let user_info = JSON.parse(localStorage.getItem('userData'));
+    this.user.next(user_info);
+    return user_info;
+  }
+
   logout() {
     this.user.next(null);
-    this.router.navigate(['/']);
     localStorage.removeItem('userData');
+    localStorage.removeItem('prodList');
+    this.modal.dismissAll();
+    this.router.navigate(['/']);
     if (this.tokenExpirationTimer) {
       clearTimeout(this.tokenExpirationTimer);
     }
@@ -148,8 +156,8 @@ export class AuthService {
 
   private handleAuthentication(
     email: string,
-    userId: string,
     displayName: string,
+    userId: string,
     registered: boolean,
     token: string,
     expiresIn: number
@@ -157,8 +165,8 @@ export class AuthService {
     const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
     const user = new User(
       email,
-      userId,
       displayName,
+      userId,
       registered,
       token,
       expirationDate
