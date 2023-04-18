@@ -1,0 +1,35 @@
+#alerts {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 350px;
+  border-radius: 35px;
+  z-index: 999 !important;
+  padding: 20px !important;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  h4 {
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.bg-success {
+  background: #12b28c !important;
+}
+
+.bg-updated {
+  background: #5734b5 !important;
+}
+
+.bg-error {
+  background: #f05454 !important;
+}
+
+.bg-warning {
+  background: #fca652 !important;
+}
