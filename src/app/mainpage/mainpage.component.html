@@ -1,93 +1,61 @@
 <div class="container-fluid">
-  <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
-    <!-- Indicators/dots -->
-    <div class="carousel-indicators">
-      <button
-        type="button"
-        data-bs-target="#carouselExampleControls"
-        data-bs-slide-to="0"
-        class="active"
-      ></button>
-      <button
-        type="button"
-        data-bs-target="#carouselExampleControls"
-        data-bs-slide-to="1"
-      ></button>
-      <button
-        type="button"
-        data-bs-target="#carouselExampleControls"
-        data-bs-slide-to="2"
-      ></button>
-    </div>
-    <div class="carousel-inner">
-      <div class="carousel-item active">
+  <ngb-carousel>
+		<ng-template ngbSlide>
+			<div class="picsum-img-wrapper">
         <img
-          class="d-block w-100"
-          src="assets/img/intro-bg_1_.jpg"
-          alt="First slide"
-          height="500px"
-        />
-        <div class="carousel-caption">
-          <h1>We sell lifestyle.</h1>
-          <p>Flat 40% OFF on premium brands</p>
-          <a routerLink="/products" class="btn btn-danger btn-lg active"
-            >Shop Now</a
-          >
-        </div>
-      </div>
-      <div class="carousel-item">
+        class="d-block w-100"
+        src="assets/img/intro-bg_1_.jpg"
+        alt="First slide"
+        height="500px"
+      />
+			</div>
+      <div class="carousel-caption">
+				<h1>We sell lifestyle.</h1>
+        <p>Flat 40% OFF on premium brands</p>
+        <a routerLink="/products" class="btn btn-danger btn-lg active">Shop Now</a>
+			</div>
+		</ng-template>
+		<ng-template ngbSlide>
+			<div class="picsum-img-wrapper">
         <img
-          class="d-block w-100"
-          src="assets/img/sale-banner.jpg"
-          alt="Second slide"
-          height="500px"
-        />
-      </div>
-      <div class="carousel-item">
+        class="d-block w-100"
+        src="assets/img/sale-banner.jpg"
+        alt="Second slide"
+        height="500px"
+      />
+			</div>
+		</ng-template>
+		<ng-template ngbSlide>
+			<div class="picsum-img-wrapper">
         <img
-          class="d-block w-100"
-          src="assets/img/pr.png"
-          alt="Third slide"
-          height="500px"
-        />
-      </div>
-    </div>
-    <!-- Left and right controls/icons -->
-    <button
-      class="carousel-control-prev"
-      type="button"
-      data-bs-target="#carouselExampleControls"
-      data-bs-slide="prev"
-    >
-      <span class="carousel-control-prev-icon"></span>
-    </button>
-    <button
-      class="carousel-control-next"
-      type="button"
-      data-bs-target="#carouselExampleControls"
-      data-bs-slide="next"
-    >
-      <span class="carousel-control-next-icon"></span>
-    </button>
-  </div>
+        class="d-block w-100"
+        src="assets/img/pr.png"
+        alt="Third slide"
+        height="500px"
+      />
+			</div>
+		</ng-template>
+	</ngb-carousel>
   <!--Item categories listing-->
   <div class="m-4">
     <div class="row text-center" id="item_list">
-      <div class="col-sm-3" *ngFor="let x of products">
-        <div class="card mb-3">
-          <img
-            src="{{ x.image }}"
-            class="card-img-top"
-            alt="{{ x.name }}"
-            height="150px"
-          />
-          <div class="card-body text-center">
-            <h5 class="card-title">{{ x.name }}</h5>
-            <p class="card-text">{{ x.title }}</p>
-            <a routerLink="/products" class="btn btn-primary">View</a>
+      @for(x of products; track x.id){
+        <div class="col-sm-3" >
+          <div class="card mb-3">
+            <img
+              [src]="x.image"
+              class="card-img-top"
+              [alt]="x.name"
+              height="150px"
+            />
+            <div class="card-body text-center">
+              <h5 class="card-title">{{ x.name }}</h5>
+              <p class="card-text">{{ x.title }}</p>
+              <a routerLink="/products" class="btn btn-primary">View</a>
+            </div>
           </div>
         </div>
-      </div>
+      }
     </div>
   </div>
   <!--Item categories listing end-->

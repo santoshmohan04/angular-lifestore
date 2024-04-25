@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
     this.authService.autoLogin();
     this.authForm = this.fb.group({
       userEmail: [
-        '',
+        null,
         [
           Validators.required,
           Validators.email,
@@ -42,7 +42,7 @@ export class LoginComponent implements OnInit {
     });
     this.signupForm = this.fb.group({
       sigupEmail: [
-        '',
+        null,
         [
           Validators.required,
           Validators.email,
@@ -51,7 +51,7 @@ export class LoginComponent implements OnInit {
           ),
         ],
       ],
-      signupPswd: ['', Validators.required],
+      signupPswd: [null, Validators.required],
     });
     let checkUsr = localStorage.getItem('usr');
     if (checkUsr) {
@@ -85,6 +85,7 @@ export class LoginComponent implements OnInit {
     authObs.subscribe({
       next: (resData) => {
         this.isLoading = false;
+        localStorage.setItem('authdata', JSON.stringify(resData));
         this.router.navigate(['/products']);
       },
       error: (errorMessage) => {

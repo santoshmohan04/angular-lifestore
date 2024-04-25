@@ -19,6 +19,7 @@ import {
   NgbModule,
   NgbCollapseModule,
   NgbDropdownModule,
+  NgbCarouselModule
 } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from './alerts/alerts.component';
 import { AlertMessageService } from './alerts/alertmsg.service';
@@ -50,6 +51,7 @@ import { AuthService } from './auth.service';
     NgbDropdownModule,
     NgbModule,
     NgbCollapseModule,
+    NgbCarouselModule
   ],
   providers: [
     AuthService,
