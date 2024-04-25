@@ -32,6 +32,8 @@ export class CartComponent implements OnInit {
           this.cartKeys = Object.keys(responseData);
           this.cartValues = Object.values(responseData);
           this.cartValues.forEach((t: any) => {
+            t.qty = 0;
+            t.item=parseFloat(t.item);
             this.total += parseFloat(t.price);
           });
         }

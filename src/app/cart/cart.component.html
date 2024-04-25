@@ -7,56 +7,85 @@
 
   <ng-container>
     <h2>Shopping Cart ({{ cartValues.length }} item/s in your cart)</h2>
-    <table
-      class="table table-striped table-hover table-bordered table-responsive"
-      aria-describedby="shoppingcart"
-    >
-      <thead class="table-dark">
-        <tr>
-          <th scope="row">Item Id</th>
-          <th scope="row">Image</th>
-          <th scope="row">Item Name</th>
-          <th scope="row">Price</th>
-          <th scope="row">Remove</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let x of cartValues; let i = index" [attr.id]="x.id">
-          <td>{{ x.id }}</td>
-          <td>
-            <img
-              src="assets/{{ x.image }}"
-              alt="{{ x.name }}"
-              class="card-img-top"
-              height="100px"
+    <div class="container">
+      <div class="divTable div-hover">
+        <div class="rowTable bg-primary text-white pb-2">
+          <div class="divTableCol">Product</div>
+          <div class="divTableCol">Quantity</div>
+          <div class="divTableCol">Price</div>
+          <div class="divTableCol">Total</div>
+          <div class="divTableCol">Actions</div>
+        </div>
+        @for(item of cartValues; track item.id){
+        <div class="rowTable">
+          <div class="divTableCol">
+            <div class="media d-flex">
+              <a class="pull-left mr-2 ml-0"
+                ><img
+                  class="img-fluid"
+                  src="assets/{{ item.image }}"
+                  style="width: 92px; height: 72px; margin-left: 0"
+              /></a>
+              <div class="media-body">
+                <h4 class="media-heading">{{ item.name }}</h4>
+              </div>
+            </div>
+          </div>
+          <div class="divTableCol">
+            <input
+              type="email"
+              class="form-control"
+              [(ngModel)]="item.qty"
             />
-          </td>
-          <td>{{ x.name }}</td>
-          <td>Rs.{{ x.price }}</td>
-          <td style="color: red" (click)="rmCart(x)">
-            <i class="bi-trash"></i>
-          </td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <th style="text-align: right" colspan="3" scope="row">
-            <b>Total</b>
-          </th>
-          <td colspan="2">
-            <b>Rs. </b><b>{{ total }}</b>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-    <hr />
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-primary" type="button" (click)="conformOrd()">
-        Confirm Order
-      </button>
-      <button class="btn btn-danger mx-3" type="button" (click)="clearCart()">
-        Clear
-      </button>
+          </div>
+          <div class="divTableCol">
+            <strong>Rs.{{ item.price | number }}</strong>
+          </div>
+          <div class="divTableCol">
+            <strong>Rs.{{ item.qty * item.price }}</strong>
+          </div>
+          <div class="divTableCol">
+            <button type="button" class="btn btn-danger" (click)="rmCart(item)">
+              <span class="fa fa-remove"></span> Remove
+            </button>
+          </div>
+        </div>
+        }
+        <div class="rowTable">
+          <div class="divTableCol"></div>
+          <div class="divTableCol"></div>
+          <div class="divTableCol"></div>
+          <div class="divTableCol"><h3>Total</h3></div>
+          <div class="divTableCol">
+            <h3>
+              <strong>Rs.{{ total }}</strong>
+            </h3>
+          </div>
+        </div>
+        <div class="rowTable">
+          <div class="divTableCol"></div>
+          <div class="divTableCol"></div>
+          <div class="divTableCol"></div>
+          <div class="divTableCol">
+            <button
+              type="button"
+              class="btn btn-danger"
+              (click)="clearCart()"
+            >
+              Clear
+            </button>
+          </div>
+          <div class="divTableCol">
+            <button
+              type="button"
+              class="btn btn-success"
+              (click)="conformOrd()"
+            >
+              Confirm Order
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </ng-container>
 </div>
