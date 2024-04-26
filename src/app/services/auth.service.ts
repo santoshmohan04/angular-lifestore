@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
-import { catchError, tap } from 'rxjs/operators';
-import { throwError, BehaviorSubject } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { Router } from "@angular/router";
+import { catchError, tap } from "rxjs/operators";
+import { throwError, BehaviorSubject } from "rxjs";
 
-import { User } from './user.model';
-import { environment } from 'src/environments/environment';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { User } from "./user.model";
+import { environment } from "src/environments/environment";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 
 export interface AuthResponseData {
   kind: string;
@@ -19,7 +19,7 @@ export interface AuthResponseData {
   registered?: boolean;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class AuthService {
   user = new BehaviorSubject<User>(null);
   private tokenExpirationTimer: any;
@@ -32,13 +32,8 @@ export class AuthService {
     private modal: NgbModal
   ) {}
 
-  signup(email: string, password: string) {
-    const url = this.auth_url + 'accounts:signUp?key=' + this.apiKey;
-    const payload = {
-      email: email,
-      password: password,
-      returnSecureToken: true,
-    };
+  signup(payload: any) {
+    const url = this.auth_url + "accounts:signUp?key=" + this.apiKey;
     return this.http.post<AuthResponseData>(url, payload).pipe(
       catchError(this.handleError),
       tap((resData) => {
@@ -54,14 +49,9 @@ export class AuthService {
     );
   }
 
-  login(email: string, password: string) {
+  login(payload: any) {
     const url =
-      this.auth_url + 'accounts:signInWithPassword?key=' + this.apiKey;
-    const payload = {
-      email: email,
-      password: password,
-      returnSecureToken: true,
-    };
+      this.auth_url + "accounts:signInWithPassword?key=" + this.apiKey;
     return this.http.post<AuthResponseData>(url, payload).pipe(
       catchError(this.handleError),
       tap((resData) => {
@@ -78,7 +68,7 @@ export class AuthService {
   }
 
   chngpswd(confPswd: string) {
-    const url = this.auth_url + 'accounts:update?key=' + this.apiKey;
+    const url = this.auth_url + "accounts:update?key=" + this.apiKey;
     const payload = {
       idToken: this.user.value.token,
       password: confPswd,
@@ -107,7 +97,7 @@ export class AuthService {
       registered: boolean;
       _token: string;
       _tokenExpirationDate: string;
-    } = JSON.parse(localStorage.getItem('userData'));
+    } = JSON.parse(localStorage.getItem("userData"));
     if (!userData) {
       return;
     }
@@ -131,17 +121,17 @@ export class AuthService {
   }
 
   getUserInfo() {
-    let user_info = JSON.parse(localStorage.getItem('userData'));
+    let user_info = JSON.parse(localStorage.getItem("userData"));
     this.user.next(user_info);
     return user_info;
   }
 
   logout() {
     this.user.next(null);
-    localStorage.removeItem('userData');
-    localStorage.removeItem('prodList');
+    localStorage.removeItem("userData");
+    localStorage.removeItem("prodList");
     this.modal.dismissAll();
-    this.router.navigate(['/']);
+    this.router.navigate(["/"]);
     if (this.tokenExpirationTimer) {
       clearTimeout(this.tokenExpirationTimer);
     }
@@ -173,23 +163,23 @@ export class AuthService {
     );
     this.user.next(user);
     this.autoLogout(expiresIn * 1000);
-    localStorage.setItem('userData', JSON.stringify(user));
+    localStorage.setItem("userData", JSON.stringify(user));
   }
 
   private handleError(errorRes: HttpErrorResponse) {
-    let errorMessage = 'An unknown error occurred!';
+    let errorMessage = "An unknown error occurred!";
     if (!errorRes.error || !errorRes.error.error) {
       return throwError(() => new Error(errorMessage));
     }
     switch (errorRes.error.error.message) {
-      case 'EMAIL_EXISTS':
-        errorMessage = 'This email exists already';
+      case "EMAIL_EXISTS":
+        errorMessage = "This email exists already";
         break;
-      case 'EMAIL_NOT_FOUND':
-        errorMessage = 'This email does not exist.';
+      case "EMAIL_NOT_FOUND":
+        errorMessage = "This email does not exist.";
         break;
-      case 'INVALID_PASSWORD':
-        errorMessage = 'This password is not correct.';
+      case "INVALID_PASSWORD":
+        errorMessage = "This password is not correct.";
         break;
     }
     return throwError(() => new Error(errorMessage));

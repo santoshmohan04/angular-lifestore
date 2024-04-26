@@ -1,14 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { AuthResponseData, AuthService } from '../auth.service';
-import { AlertMessageService } from '../alerts/alertmsg.service';
+import { Component, OnInit } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { Router } from "@angular/router";
+import { Observable } from "rxjs";
+import { AuthResponseData, AuthService } from "../services/auth.service";
+import { AlertMessageService } from "../alerts/alertmsg.service";
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
+  selector: "app-login",
+  templateUrl: "./login.component.html",
+  styleUrls: ["./login.component.css"],
 })
 export class LoginComponent implements OnInit {
   active = 1;
@@ -38,7 +38,7 @@ export class LoginComponent implements OnInit {
           ),
         ],
       ],
-      userPswd: ['', Validators.required],
+      userPswd: ["", Validators.required],
     });
     this.signupForm = this.fb.group({
       sigupEmail: [
@@ -53,7 +53,7 @@ export class LoginComponent implements OnInit {
       ],
       signupPswd: [null, Validators.required],
     });
-    let checkUsr = localStorage.getItem('usr');
+    let checkUsr = localStorage.getItem("usr");
     if (checkUsr) {
       let usrCrd = JSON.parse(checkUsr);
       this.authForm.patchValue({
@@ -76,17 +76,22 @@ export class LoginComponent implements OnInit {
         user_email: email,
         user_pswd: password,
       };
-      localStorage.setItem('usr', JSON.stringify(payload));
+      localStorage.setItem("usr", JSON.stringify(payload));
     }
 
     let authObs: Observable<AuthResponseData>;
     this.isLoading = true;
-    authObs = this.authService.login(email, password);
+    const loginpayload = {
+      email: email,
+      password: password,
+      returnSecureToken: true,
+    };
+    authObs = this.authService.login(loginpayload);
     authObs.subscribe({
       next: (resData) => {
         this.isLoading = false;
-        localStorage.setItem('authdata', JSON.stringify(resData));
-        this.router.navigate(['/products']);
+        localStorage.setItem("authdata", JSON.stringify(resData));
+        this.router.navigate(["/products"]);
       },
       error: (errorMessage) => {
         console.log(errorMessage);
@@ -107,14 +112,18 @@ export class LoginComponent implements OnInit {
     let authObs: Observable<AuthResponseData>;
 
     this.isLoading = true;
-
-    authObs = this.authService.signup(email, password);
+    const signuppayload = {
+      email: email,
+      password: password,
+      returnSecureToken: true,
+    };
+    authObs = this.authService.signup(signuppayload);
 
     authObs.subscribe({
       next: (resData) => {
         console.log(resData);
         this.isLoading = false;
-        this.router.navigate(['/products']);
+        this.router.navigate(["/products"]);
       },
       error: (errorMessage) => {
         this.isLoading = false;

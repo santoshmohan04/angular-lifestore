@@ -1,136 +1,150 @@
-<div *ngIf="isLoading" style="text-align: center">
-  <app-loading-spinner></app-loading-spinner>
-</div>
+<ng-container [ngTemplateOutlet]="displayTemplate()"></ng-container>
 
-<div class="container-fluid" id="content" *ngIf="!isLoading">
-  <!-- Jumbotron Header -->
-  <div class="mt-4 p-5 bg-primary text-white text-center">
-    <h1>Welcome to our Lifestyle Store!</h1>
-    <p>
-      We have the best cameras, watches and shirts for you. No need to hunt
-      around, we have all in one place.
-    </p>
+<ng-template #spinner>
+  <div style="text-align: center">
+    <app-loading-spinner></app-loading-spinner>
   </div>
-  <hr />
+</ng-template>
 
-  <div class="card">
-    <div class="card-header">
-      <h3><i class="fas fa-camera"></i> Cameras</h3>
+<ng-template #productstemp>
+  <div class="container-fluid" id="content">
+    <!-- Jumbotron Header -->
+    <div class="mt-4 p-5 bg-primary text-white text-center">
+      <h1>Welcome to our Lifestyle Store!</h1>
+      <p>
+        We have the best cameras, watches and shirts for you. No need to hunt
+        around, we have all in one place.
+      </p>
     </div>
-    <div class="card-body">
-      <div class="row text-center" id="cameras">
-        <div class="col-sm-3" *ngFor="let x of cam; let i = index">
-          <div class="card mb-3">
-            <img
-              src="assets/{{ x.image }}"
-              alt="{{ x.name }}"
-              class="card-img-top"
-              height="150px"
-            />
-            <div class="card-body text-center">
-              <h3 class="card-title">{{ x.name }}</h3>
-              <p class="card-text">{{ x.price }}</p>
-              <button
-                type="button"
-                class="btn btn-block btn-primary"
-                (click)="addtoCart(i, 'camera')"
-              >
-                Add to cart
-              </button>
+    <hr />
+
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fas fa-camera"></i> Cameras</h3>
+      </div>
+      <div class="card-body">
+        <div class="row text-center" id="cameras">
+          @for(x of cam; track x.id){
+          <div class="col-sm-3">
+            <div class="card mb-3">
+              <img
+                src="assets/{{ x.image }}"
+                alt="{{ x.name }}"
+                class="card-img-top"
+                height="150px"
+              />
+              <div class="card-body text-center">
+                <h3 class="card-title">{{ x.name }}</h3>
+                <p class="card-text">{{ x.price }}</p>
+                <button
+                  type="button"
+                  class="btn btn-block btn-primary"
+                  (click)="addtoCart(i, 'camera')"
+                >
+                  Add to cart
+                </button>
+              </div>
             </div>
           </div>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-header">
+        <h3><i class="fas fa-clock"></i> Watches</h3>
+      </div>
+      <div class="card-body">
+        <div class="row text-center" id="watches">
+          @for(p of wt; track p.id){
+          <div class="col-sm-3">
+            <div class="card mb-3">
+              <img
+                src="assets/{{ p.image }}"
+                alt="{{ p.name }}"
+                class="card-img-top"
+                height="150px"
+              />
+              <div class="card-body text-center">
+                <h3 class="card-title">{{ p.name }}</h3>
+                <p class="card-text">{{ p.price }}</p>
+                <button
+                  type="button"
+                  class="btn btn-block btn-primary"
+                  (click)="addtoCart(i, 'watch')"
+                >
+                  Add to cart
+                </button>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-header">
+        <h3><i class="fas fa-tshirt"></i> Shirts</h3>
+      </div>
+      <div class="card-body">
+        <div class="row text-center" id="shirts">
+          @for(t of st; track t.id){
+          <div class="col-sm-3">
+            <div class="card mb-3">
+              <img
+                src="assets/{{ t.image }}"
+                alt="{{ t.name }}"
+                class="card-img-top"
+                height="150px"
+              />
+              <div class="card-body text-center">
+                <h3 class="card-title">{{ t.name }}</h3>
+                <p class="card-text">{{ t.price }}</p>
+                <button
+                  type="button"
+                  class="btn btn-block btn-primary"
+                  (click)="addtoCart(i, 'shirt')"
+                >
+                  Add to cart
+                </button>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-header">
+        <h3><i class="fas fa-mobile"></i> Smartphones</h3>
+      </div>
+      <div class="card-body">
+        <div class="row text-center" id="smartphones">
+          @for(m of smph; track m.id){
+          <div class="col-sm-3">
+            <div class="card mb-3">
+              <img
+                src="assets/{{ m.image }}"
+                alt="{{ m.name }}"
+                class="card-img-top"
+                height="200px"
+              />
+              <div class="card-body text-center">
+                <h3 class="card-title">{{ m.name }}</h3>
+                <p class="card-text">{{ m.price }}</p>
+                <button
+                  type="button"
+                  class="btn btn-block btn-primary"
+                  (click)="addtoCart(i, 'smartphone')"
+                >
+                  Add to cart
+                </button>
+              </div>
+            </div>
+          </div>
+          }
         </div>
       </div>
     </div>
   </div>
-  <div class="card mt-3">
-    <div class="card-header">
-      <h3><i class="fas fa-clock"></i> Watches</h3>
-    </div>
-    <div class="card-body">
-      <div class="row text-center" id="watches">
-        <div class="col-sm-3" *ngFor="let p of wt; let i = index">
-          <div class="card mb-3">
-            <img
-              src="assets/{{ p.image }}"
-              alt="{{ p.name }}"
-              class="card-img-top"
-              height="150px"
-            />
-            <div class="card-body text-center">
-              <h3 class="card-title">{{ p.name }}</h3>
-              <p class="card-text">{{ p.price }}</p>
-              <button
-                type="button"
-                class="btn btn-block btn-primary"
-                (click)="addtoCart(i, 'watch')"
-              >
-                Add to cart
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="card mt-3">
-    <div class="card-header">
-      <h3><i class="fas fa-tshirt"></i> Shirts</h3>
-    </div>
-    <div class="card-body">
-      <div class="row text-center" id="shirts">
-        <div class="col-sm-3" *ngFor="let t of st; let i = index">
-          <div class="card mb-3">
-            <img
-              src="assets/{{ t.image }}"
-              alt="{{ t.name }}"
-              class="card-img-top"
-              height="150px"
-            />
-            <div class="card-body text-center">
-              <h3 class="card-title">{{ t.name }}</h3>
-              <p class="card-text">{{ t.price }}</p>
-              <button
-                type="button"
-                class="btn btn-block btn-primary"
-                (click)="addtoCart(i, 'shirt')"
-              >
-                Add to cart
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="card mt-3">
-    <div class="card-header">
-      <h3><i class="fas fa-mobile"></i> Smartphones</h3>
-    </div>
-    <div class="card-body">
-      <div class="row text-center" id="smartphones">
-        <div class="col-sm-3" *ngFor="let m of smph; let i = index">
-          <div class="card mb-3">
-            <img
-              src="assets/{{ m.image }}"
-              alt="{{ m.name }}"
-              class="card-img-top"
-              height="200px"
-            />
-            <div class="card-body text-center">
-              <h3 class="card-title">{{ m.name }}</h3>
-              <p class="card-text">{{ m.price }}</p>
-              <button
-                type="button"
-                class="btn btn-block btn-primary"
-                (click)="addtoCart(i, 'smartphone')"
-              >
-                Add to cart
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+</ng-template>

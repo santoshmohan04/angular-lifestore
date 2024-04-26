@@ -1,14 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { AuthService, AuthResponseData } from '../auth.service';
-import { Observable } from 'rxjs';
-import { SharedService } from '../services/shared.services';
-import { AlertMessageService } from '../alerts/alertmsg.service';
+import { Component, OnInit } from "@angular/core";
+import { NgForm } from "@angular/forms";
+import { AuthService, AuthResponseData } from "../services/auth.service";
+import { Observable } from "rxjs";
+import { SharedService } from "../services/shared.services";
+import { AlertMessageService } from "../alerts/alertmsg.service";
 
 @Component({
-  selector: 'app-settings',
-  templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.css'],
+  selector: "app-settings",
+  templateUrl: "./settings.component.html",
+  styleUrls: ["./settings.component.css"],
 })
 export class SettingsComponent implements OnInit {
   isLoading = false;
@@ -16,9 +16,9 @@ export class SettingsComponent implements OnInit {
   userOrds: any = [];
   userItems: any = [];
   itemDates: any = [];
-  userEmail: string = '';
-  userId: string = '';
-  userName: string = '';
+  userEmail: string = "";
+  userId: string = "";
+  userName: string = "";
   userReg: boolean = null;
 
   constructor(
@@ -73,9 +73,9 @@ export class SettingsComponent implements OnInit {
           this.userEmail = resData.email;
           this.isLoading = false;
           this.alertMsg.alertSuccess(
-            'Password Changed, Relogin with new password'
+            "Password Changed, Relogin with new password"
           );
-          this.error = '';
+          this.error = "";
           this.authService.logout();
         },
         error: (errorMessage) => {
@@ -87,7 +87,7 @@ export class SettingsComponent implements OnInit {
 
       form.reset();
     } else {
-      this.error = 'New Password and Conform Password do not match';
+      this.error = "New Password and Conform Password do not match";
     }
   }
 }

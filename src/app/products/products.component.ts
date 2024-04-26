@@ -1,20 +1,30 @@
-import { Component, OnInit } from '@angular/core';
-import { SharedService } from '../services/shared.services';
-import { Products } from '../data/product.data';
-import { AlertMessageService } from '../alerts/alertmsg.service';
+import {
+  AfterViewInit,
+  Component,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  signal,
+} from "@angular/core";
+import { SharedService } from "../services/shared.services";
+import { Products } from "../data/product.data";
+import { AlertMessageService } from "../alerts/alertmsg.service";
 
 @Component({
-  selector: 'app-products',
-  templateUrl: './products.component.html',
-  styleUrls: ['./products.component.css'],
+  selector: "app-products",
+  templateUrl: "./products.component.html",
+  styleUrls: ["./products.component.css"],
 })
-export class ProductsComponent implements OnInit {
-  prodlist: any = '';
-  cam: any = '';
-  st: any = '';
-  wt: any = '';
-  smph: any = '';
-  isLoading = false;
+export class ProductsComponent implements OnInit, AfterViewInit {
+  displayTemplate = signal<TemplateRef<string>>(null);
+  prodlist: any = "";
+  cam: any = "";
+  st: any = "";
+  wt: any = "";
+  smph: any = "";
+
+  @ViewChild("spinner") private spinner: TemplateRef<string>;
+  @ViewChild("productstemp") private productstemp: TemplateRef<string>;
 
   constructor(
     private alertMsg: AlertMessageService,
@@ -22,34 +32,36 @@ export class ProductsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.isLoading = true;
-    let prod_data = localStorage.getItem('prodList');
+    let prod_data = localStorage.getItem("prodList");
+    console.log("prod_data >>> ", prod_data);
     if (prod_data) {
-      this.isLoading = false;
       this.prodlist = JSON.parse(prod_data);
       this.cam = this.prodlist.cameras;
       this.st = this.prodlist.shirts;
       this.wt = this.prodlist.watches;
       this.smph = this.prodlist.smartphones;
+      this.displayTemplate.set(this.productstemp);
     } else {
       this.productList();
     }
   }
 
+  ngAfterViewInit(): void {
+    this.displayTemplate.set(this.spinner);
+  }
+
   productList() {
-    this.isLoading = true;
     this.shareService.getProductList().subscribe({
       next: (responseData: Products) => {
-        this.isLoading = false;
-        localStorage.setItem('prodList', JSON.stringify(responseData));
+        localStorage.setItem("prodList", JSON.stringify(responseData));
         this.prodlist = responseData;
         this.cam = this.prodlist.cameras;
         this.st = this.prodlist.shirts;
         this.wt = this.prodlist.watches;
         this.smph = this.prodlist.smartphones;
+        this.displayTemplate.set(this.productstemp);
       },
       error: (err: any) => {
-        this.isLoading = false;
         this.alertMsg.alertDanger(err);
       },
     });
@@ -84,8 +96,8 @@ export class ProductsComponent implements OnInit {
     };
     this.shareService.addToCart(cust_data[action]).subscribe({
       next: (responseData) => {
-        if (responseData.hasOwnProperty('name')) {
-          this.alertMsg.alertSuccess('Added to Cart');
+        if (responseData.hasOwnProperty("name")) {
+          this.alertMsg.alertSuccess("Added to Cart");
         }
       },
     });

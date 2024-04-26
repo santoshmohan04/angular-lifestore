@@ -1,19 +1,31 @@
-import { Component, OnInit } from '@angular/core';
-import { AlertMessageService } from '../alerts/alertmsg.service';
-import { SharedService } from '../services/shared.services';
-import { DatePipe } from '@angular/common';
+import {
+  AfterViewInit,
+  Component,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  signal,
+} from "@angular/core";
+import { AlertMessageService } from "../alerts/alertmsg.service";
+import { SharedService } from "../services/shared.services";
+import { DatePipe } from "@angular/common";
 
 @Component({
-  selector: 'app-cart',
-  templateUrl: './cart.component.html',
-  styleUrls: ['./cart.component.css'],
+  selector: "app-cart",
+  templateUrl: "./cart.component.html",
+  styleUrls: ["./cart.component.css"],
 })
-export class CartComponent implements OnInit {
+export class CartComponent implements OnInit, AfterViewInit {
+  displayTemplate = signal<TemplateRef<string>>(null);
   cartKeys: any = [];
   cartValues: any = [];
   total: number = 0;
-  ordmsg: string = '';
+  ordmsg: string = "";
   ordDate = new Date();
+
+  @ViewChild("msgtemplate") private msgtemplate: TemplateRef<string>;
+  @ViewChild("carttemplate") private carttemplate: TemplateRef<string>;
+  @ViewChild("spinner") private spinner: TemplateRef<string>;
 
   constructor(
     private datepipe: DatePipe,
@@ -25,6 +37,10 @@ export class CartComponent implements OnInit {
     this.cartItems();
   }
 
+  ngAfterViewInit(): void {
+    this.displayTemplate.set(this.spinner);
+  }
+
   cartItems() {
     this.shareService.getCartItems().subscribe({
       next: (responseData) => {
@@ -33,26 +49,42 @@ export class CartComponent implements OnInit {
           this.cartValues = Object.values(responseData);
           this.cartValues.forEach((t: any) => {
             t.qty = 0;
-            t.item=parseFloat(t.item);
-            this.total += parseFloat(t.price);
+            t.item = parseFloat(t.item);
           });
+          if (this.cartValues.length > 0) {
+            this.displayTemplate.set(this.carttemplate);
+          } else {
+            this.ordmsg = "No Items Present in the Cart";
+            this.displayTemplate.set(this.msgtemplate);
+          }
+        } else {
+          this.ordmsg = "No Items Present in the Cart";
+          this.displayTemplate.set(this.msgtemplate);
         }
       },
       error: (err: any) => {
         this.alertMsg.alertDanger(err);
+        this.ordmsg = "Some thing went wrong";
+        this.displayTemplate.set(this.msgtemplate);
       },
     });
+  }
+
+  getTotal() {
+    this.cartValues.forEach((t: any) => {
+      this.total += t.price * t.qty;
+    });
+    return this.total;
   }
 
   rmCart(x: any) {
     const index = this.cartValues.indexOf(x);
     this.cartValues.splice(index, 1);
-    this.total = this.total - x.price;
     let cartid = this.cartKeys.at(index);
     this.shareService.removeCartItems(cartid).subscribe({
       next: (responseData) => {
         if (responseData == null) {
-          this.alertMsg.alertInfo('Removed from Cart');
+          this.alertMsg.alertInfo("Removed from Cart");
         }
       },
       error: (err: any) => {
@@ -64,11 +96,11 @@ export class CartComponent implements OnInit {
   conformOrd() {
     let ordData = {
       items: this.cartValues,
-      orddate: this.datepipe.transform(this.ordDate, 'medium'),
+      orddate: this.datepipe.transform(this.ordDate, "medium"),
     };
     this.shareService.conformOrder(ordData).subscribe({
       next: (responseData) => {
-        if (responseData.hasOwnProperty('name') === true) {
+        if (responseData.hasOwnProperty("name") === true) {
           this.shareService.clearCart().subscribe({
             next: (responseData) => {
               if (responseData == null) {
@@ -76,18 +108,19 @@ export class CartComponent implements OnInit {
                 this.cartValues = [];
                 this.total = 0;
                 this.ordmsg =
-                  'Your order is confirmed. Thank you for shopping with us.';
+                  "Your order is confirmed. Thank you for shopping with us.";
+                this.displayTemplate.set(this.msgtemplate);
               }
             },
             error: (err: any) => {
-              console.log('err in clearCart >>> ', err);
+              console.log("err in clearCart >>> ", err);
               this.alertMsg.alertDanger(err);
             },
           });
         }
       },
       error: (err: any) => {
-        console.log('err in conformOrd >>> ', err);
+        console.log("err in conformOrd >>> ", err);
         this.alertMsg.alertDanger(err);
       },
     });
@@ -100,11 +133,13 @@ export class CartComponent implements OnInit {
           this.cartKeys = [];
           this.cartValues = [];
           this.total = 0;
-          this.ordmsg = '';
+          this.ordmsg = "";
+          this.ordmsg = "No Items Present in the Cart";
+          this.displayTemplate.set(this.msgtemplate);
         }
       },
       error: (err: any) => {
-        console.log('err in clearCart >>> ', err);
+        console.log("err in clearCart >>> ", err);
         this.alertMsg.alertDanger(err);
       },
     });
