@@ -24,7 +24,7 @@
       </div>
       <div class="card-body">
         <div class="row text-center" id="cameras">
-          @for(x of cam; track x.id){
+          @for(x of prodlist.cameras; let i =$index; track x.id){
           <div class="col-sm-3">
             <div class="card mb-3">
               <img
@@ -56,7 +56,7 @@
       </div>
       <div class="card-body">
         <div class="row text-center" id="watches">
-          @for(p of wt; track p.id){
+          @for(p of prodlist.watches; let i =$index; track p.id){
           <div class="col-sm-3">
             <div class="card mb-3">
               <img
@@ -88,7 +88,7 @@
       </div>
       <div class="card-body">
         <div class="row text-center" id="shirts">
-          @for(t of st; track t.id){
+          @for(t of prodlist.shirts; let i =$index; track t.id){
           <div class="col-sm-3">
             <div class="card mb-3">
               <img
@@ -120,7 +120,7 @@
       </div>
       <div class="card-body">
         <div class="row text-center" id="smartphones">
-          @for(m of smph; track m.id){
+          @for(m of prodlist.smartphones; let i =$index; track m.id){
           <div class="col-sm-3">
             <div class="card mb-3">
               <img

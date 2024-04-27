@@ -1,57 +1,63 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { NgForm } from "@angular/forms";
 import { AuthService, AuthResponseData } from "../services/auth.service";
-import { Observable } from "rxjs";
-import { SharedService } from "../services/shared.services";
+import { Subject, takeUntil } from "rxjs";
+import { Store } from '@ngrx/store';
 import { AlertMessageService } from "../alerts/alertmsg.service";
+import { AuthUserState, CommonState } from "../store/common.reducers";
+import * as commonactions from "src/app/store/common.actions"
 
 @Component({
   selector: "app-settings",
   templateUrl: "./settings.component.html",
   styleUrls: ["./settings.component.css"],
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent implements OnInit, OnDestroy {
   isLoading = false;
   error: string = null;
   userOrds: any = [];
   userItems: any = [];
   itemDates: any = [];
-  userEmail: string = "";
-  userId: string = "";
-  userName: string = "";
-  userReg: boolean = null;
+  userdetails: AuthResponseData;
+  destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
     public authService: AuthService,
-    private shareService: SharedService,
-    private alertMsg: AlertMessageService
+    private alertMsg: AlertMessageService,
+    private store: Store<{ commondata: CommonState, authuser: AuthUserState }>
   ) {}
 
   ngOnInit(): void {
+    this.getUserDetails();
     this.getOrds();
   }
 
+  getUserDetails(){
+    this.store.select('authuser').pipe(takeUntil(this.destroy$)).subscribe((res) => {
+      if(res.loggedInUserDetails){
+        this.userdetails = res.loggedInUserDetails;
+        this.store.dispatch(commonactions.UserActions.fetchUserOrders());
+      } else if(res.error){
+        this.isLoading = false;
+        this.alertMsg.alertDanger(res.error);
+      }
+    })
+  }
+
   getOrds() {
-    this.shareService.getUserOrders().subscribe({
-      next: (res) => {
-        this.userOrds = Object.values(res);
+    this.store.select('commondata').pipe(takeUntil(this.destroy$)).subscribe((res) => {
+      if(res.userorders){
+        this.isLoading = false;
+        this.userOrds = Object.values(res.userorders);
         this.userOrds.forEach((element) => {
           this.userItems.push(element.items);
-        });
-        this.userEmail = this.authService.user.value.email;
-        this.userId = this.authService.user.value.displayName;
-        this.userName = this.authService.user.value.id;
-        this.userReg = this.authService.user.value.registered;
-
-        this.userOrds.forEach((element) => {
           this.itemDates.push(element.orddate);
         });
-      },
-      error: (err) => {
-        console.log(err);
-        this.alertMsg.alertDanger(err);
-      },
-    });
+      } else if(res.error){
+        this.isLoading = false;
+        this.alertMsg.alertDanger(res.error);
+      }
+    })
   }
 
   onChange(form: NgForm) {
@@ -61,33 +67,24 @@ export class SettingsComponent implements OnInit {
     const newPswd = form.value.newpswd;
     const confPswd = form.value.repswd;
     if (newPswd == confPswd) {
-      let authObs: Observable<AuthResponseData>;
-
       this.isLoading = true;
+      const pswdpayload = {
+        idToken: this.userdetails.idToken,
+        password: confPswd,
+        returnSecureToken: true,
+      };
 
-      authObs = this.authService.chngpswd(confPswd);
-
-      authObs.subscribe({
-        next: (resData) => {
-          console.log(resData);
-          this.userEmail = resData.email;
-          this.isLoading = false;
-          this.alertMsg.alertSuccess(
-            "Password Changed, Relogin with new password"
-          );
-          this.error = "";
-          this.authService.logout();
-        },
-        error: (errorMessage) => {
-          console.log(errorMessage);
-          this.error = errorMessage;
-          this.isLoading = false;
-        },
-      });
+      this.store.dispatch(commonactions.AuthPageActions.changeUserPassword({payload : pswdpayload}));
 
       form.reset();
     } else {
       this.error = "New Password and Conform Password do not match";
     }
+  }
+
+  ngOnDestroy(): void {
+    this.error = '';
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 }

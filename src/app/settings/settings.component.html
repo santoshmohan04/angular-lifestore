@@ -1,4 +1,4 @@
-<div class="container" style="padding: 20px">
+<div class="container p-5 mt-5">
   <div class="card">
     <div class="card-header">
       <ul class="nav nav-pills card-header-pills">
@@ -134,23 +134,23 @@
           <div class="row">
             <div class="col-sm-3">
               <img
-                src="{{ 'assets/img/dummy-user.png' }}"
-                alt="{{ userName }}"
+                src='assets/img/dummy-user.png'
+                [alt]="userdetails.displayName"
                 height="120px"
               />
             </div>
             <div class="col-sm-9">
               <p>
-                Hello: <strong>{{ userName ? userName : "User" }}</strong>
+                Hello: <strong>{{ userdetails.displayName ? userdetails.displayName : "User" }}</strong>
               </p>
               <p>
-                User ID: <strong>{{ userId }}</strong>
+                User ID: <strong>{{ userdetails.localId }}</strong>
               </p>
               <p>
-                Email: <strong>{{ userEmail }}</strong>
+                Email: <strong>{{ userdetails.email }}</strong>
               </p>
               <p>
-                Email Verified: <strong>{{ userReg }}</strong>
+                Email Verified: <strong>{{ userdetails.registered }}</strong>
               </p>
             </div>
           </div>

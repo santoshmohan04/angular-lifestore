@@ -1,28 +1,32 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
-import { Observable } from "rxjs";
-import { AuthResponseData, AuthService } from "../services/auth.service";
+import { Subject, takeUntil } from "rxjs";
+import { Store } from '@ngrx/store';
+import { AuthService } from "../services/auth.service";
 import { AlertMessageService } from "../alerts/alertmsg.service";
+import { AuthUserState } from "../store/common.reducers";
+import * as commonactions from "src/app/store/common.actions"
 
 @Component({
   selector: "app-login",
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.css"],
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   active = 1;
   authForm: FormGroup;
   signupForm: FormGroup;
   isLoading = false;
   isChecked = false;
   showPassword: boolean;
-
+  destroy$: Subject<boolean> = new Subject<boolean>();
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private authService: AuthService,
-    private alertMsg: AlertMessageService
+    private alertMsg: AlertMessageService,
+    private store: Store<{ authuser: AuthUserState }>
   ) {}
 
   ngOnInit(): void {
@@ -38,7 +42,7 @@ export class LoginComponent implements OnInit {
           ),
         ],
       ],
-      userPswd: ["", Validators.required],
+      userPswd: [null, Validators.required],
     });
     this.signupForm = this.fb.group({
       sigupEmail: [
@@ -62,6 +66,16 @@ export class LoginComponent implements OnInit {
       });
       this.isChecked = true;
     }
+
+    this.store.select('authuser').pipe(takeUntil(this.destroy$)).subscribe((res) => {
+      if(res.loggedInUserDetails){
+        this.isLoading = false;
+        this.router.navigate(["/products"]);
+      } else if(res.error){
+        this.isLoading = false;
+        this.alertMsg.alertDanger(res.error);
+      }
+    })
   }
 
   onlogin(form: FormGroup) {
@@ -79,26 +93,14 @@ export class LoginComponent implements OnInit {
       localStorage.setItem("usr", JSON.stringify(payload));
     }
 
-    let authObs: Observable<AuthResponseData>;
     this.isLoading = true;
     const loginpayload = {
       email: email,
       password: password,
       returnSecureToken: true,
     };
-    authObs = this.authService.login(loginpayload);
-    authObs.subscribe({
-      next: (resData) => {
-        this.isLoading = false;
-        localStorage.setItem("authdata", JSON.stringify(resData));
-        this.router.navigate(["/products"]);
-      },
-      error: (errorMessage) => {
-        console.log(errorMessage);
-        this.isLoading = false;
-        this.alertMsg.alertDanger(errorMessage);
-      },
-    });
+
+    this.store.dispatch(commonactions.AuthPageActions.loginUser({payload: loginpayload}));
     form.reset();
   }
 
@@ -109,28 +111,19 @@ export class LoginComponent implements OnInit {
     const email = form.value.sigupEmail;
     const password = form.value.signupPswd;
 
-    let authObs: Observable<AuthResponseData>;
-
     this.isLoading = true;
     const signuppayload = {
       email: email,
       password: password,
       returnSecureToken: true,
     };
-    authObs = this.authService.signup(signuppayload);
-
-    authObs.subscribe({
-      next: (resData) => {
-        console.log(resData);
-        this.isLoading = false;
-        this.router.navigate(["/products"]);
-      },
-      error: (errorMessage) => {
-        this.isLoading = false;
-        this.alertMsg.alertDanger(errorMessage);
-      },
-    });
+    this.store.dispatch(commonactions.AuthPageActions.signupUser({payload: signuppayload}));
 
     form.reset();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 }

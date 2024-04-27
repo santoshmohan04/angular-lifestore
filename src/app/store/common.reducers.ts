@@ -17,7 +17,8 @@ export const initialAuthUserState: AuthUserState = {
 
 export interface CommonState {
   productslist: Products;
-  cartList: Products;
+  cartList: any;
+  userorders: any;
   error: any;
 }
 
@@ -26,5 +27,116 @@ export const initialCommonState: CommonState = {
     ? JSON.parse(localStorage.getItem("prodList"))
     : null,
   cartList: null,
+  userorders: null,
   error: null,
 };
+
+export const userReducer = createReducer(
+  initialAuthUserState,
+  on(commonActions.AuthPageActions.loginUserSuccess, (state, {data}): AuthUserState => ({
+    ...state,
+    loggedInUserDetails: data,
+    error: null
+  })),
+  on(commonActions.AuthPageActions.loginUserFailure, (state, {error}): AuthUserState => ({
+    ...state,
+    error: error
+  })),
+  on(commonActions.AuthPageActions.changeUserPasswordSuccess, (state, {data}): AuthUserState => ({
+    ...state,
+    loggedInUserDetails: data,
+    error: null
+  })),
+  on(commonActions.AuthPageActions.changeUserPasswordFailure, (state, {error}): AuthUserState => ({
+    ...state,
+    error: error
+  })),
+  on(commonActions.AuthPageActions.signupUserSuccess, (state, {data}): AuthUserState => ({
+    ...state,
+    loggedInUserDetails: data
+  })),
+  on(commonActions.AuthPageActions.signupUserFailure, (state, {error}): AuthUserState => ({
+    ...state,
+    error: error
+  })),
+  on(commonActions.AuthPageActions.logoutUser, (state): AuthUserState => ({
+    ...state,
+    loggedInUserDetails:null,
+    error: null
+  })),
+);
+
+export const commonDataReducer = createReducer(
+  initialCommonState,
+  on(commonActions.ProductsPageActions.addProductToCartSuccess, (state, {data}): CommonState => ({
+    ...state,
+    productslist: null,
+    cartList: data,
+    error: null,
+  })),
+  on(commonActions.ProductsPageActions.addProductToCartFailure, (state, {error}): CommonState => ({
+    ...state,
+    error: error,
+  })),
+  on(commonActions.ProductsPageActions.fetchProductsSuccess, (state, {data}): CommonState => ({
+    ...state,
+    productslist: data,
+    error: null,
+  })),
+  on(commonActions.ProductsPageActions.fetchProductsFailure, (state, {error}): CommonState => ({
+    ...state,
+    error: error,
+  })),
+  on(commonActions.CartPageActions.fetchCartItemsSuccess, (state, {data}): CommonState => ({
+    ...state,
+    cartList: data === null ? 'No Items': data,
+    error: null,
+  })),
+  on(commonActions.CartPageActions.fetchCartItemsFailure, (state, {error}): CommonState => ({
+    ...state,
+    error: error,
+  })),
+  on(commonActions.CartPageActions.removeProductFromCartSuccess, (state, {data}): CommonState => ({
+    ...state,
+    cartList: data,
+    error: null,
+  })),
+  on(commonActions.CartPageActions.removeProductFromCartFailure, (state, {error}): CommonState => ({
+    ...state,
+    error: error,
+  })),
+  on(commonActions.CartPageActions.clearCartSuccess, (state, {data}): CommonState => ({
+    ...state,
+    cartList: data === null ? 'No Items': data,
+    error: null,
+  })),
+  on(commonActions.CartPageActions.clearCartFailure, (state, {error}): CommonState => ({
+    ...state,
+    error: error,
+  })),
+  on(commonActions.UserActions.fetchUserOrdersSuccess, (state, {data}): CommonState => ({
+    ...state,
+    userorders: data,
+    error: null,
+  })),
+  on(commonActions.UserActions.fetchUserOrdersFailure, (state, {error}): CommonState => ({
+    ...state,
+    error: error,
+  })),
+  on(commonActions.UserActions.conformUserOrdersSuccess, (state, {data}): CommonState => ({
+    ...state,
+    userorders: data === null ? 'No Orders': data,
+    error: null,
+  })),
+  on(commonActions.UserActions.conformUserOrdersFailure, (state, {error}): CommonState => ({
+    ...state,
+    error: error,
+  })),
+  on(commonActions.AuthPageActions.logoutUser, (state): CommonState => ({
+    ...state,
+    productslist: null,
+    cartList: null,
+    userorders: null,
+    error: null
+  })),
+);

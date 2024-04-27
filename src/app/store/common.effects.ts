@@ -1,17 +1,19 @@
 import { Injectable } from "@angular/core";
 import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { of } from "rxjs";
-import { map, exhaustMap, catchError } from "rxjs/operators";
+import { map, tap, exhaustMap, catchError } from "rxjs/operators";
 import * as commonActions from "./common.actions";
 import { AuthResponseData, AuthService } from "../services/auth.service";
 import { SharedService } from "../services/shared.services";
 import { Products } from "../data/product.data";
+import { AlertMessageService } from "../alerts/alertmsg.service";
 
 @Injectable()
 export class CommonEffects {
   constructor(
     private actions$: Actions,
     private authservice: AuthService,
+    private alertMsg: AlertMessageService,
     private shareservice: SharedService
   ) {}
 
@@ -21,6 +23,10 @@ export class CommonEffects {
       exhaustMap((action) =>
         this.authservice.login(action.payload).pipe(
           map((response: AuthResponseData) => {
+            if(response.expiresIn){
+              this.authservice.autoLogout(parseInt(response.expiresIn) * 1000);
+              localStorage.setItem("authdata", JSON.stringify(response));
+            }
             return commonActions.AuthPageActions.loginUserSuccess({
               data: response,
             });
@@ -39,6 +45,10 @@ export class CommonEffects {
       exhaustMap((action) =>
         this.authservice.signup(action.payload).pipe(
           map((response: AuthResponseData) => {
+            if(response.expiresIn){
+              this.authservice.autoLogout(parseInt(response.expiresIn) * 1000);
+              localStorage.setItem("authdata", JSON.stringify(response));
+            }
             return commonActions.AuthPageActions.signupUserSuccess({
               data: response,
             });
@@ -57,6 +67,13 @@ export class CommonEffects {
       exhaustMap((action) =>
         this.authservice.chngpswd(action.payload).pipe(
           map((response: AuthResponseData) => {
+            if(response){
+              this.alertMsg.alertSuccess(
+                "Password Changed, Relogin with new password"
+              );
+              this.authservice.logout();
+            }
+            
             return commonActions.AuthPageActions.signupUserSuccess({
               data: response,
             });
@@ -87,12 +104,31 @@ export class CommonEffects {
     );
   });
 
+  fetchCartList$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(commonActions.CartPageActions.fetchCartItems),
+      exhaustMap(() =>
+        this.shareservice.getCartItems().pipe(
+          map((response: Products) => {
+            return commonActions.CartPageActions.fetchCartItemsSuccess({
+              data: response,
+            });
+          }),
+          catchError((error: any) =>
+            of(commonActions.CartPageActions.fetchCartItemsFailure(error))
+          )
+        )
+      )
+    );
+  });
+
   addToCart$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(commonActions.ProductsPageActions.addProductToCart),
       exhaustMap((action) =>
         this.shareservice.addToCart(action.payload).pipe(
           map((response: Products) => {
+            this.alertMsg.alertSuccess("Added to Cart");
             return commonActions.ProductsPageActions.addProductToCartSuccess({
               data: response,
             });
@@ -107,16 +143,19 @@ export class CommonEffects {
 
   removeItemFromCart$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(commonActions.ProductsPageActions.addProductToCart),
+      ofType(commonActions.CartPageActions.removeProductFromCart),
       exhaustMap((action) =>
-        this.shareservice.addToCart(action.payload).pipe(
+        this.shareservice.removeCartItems(action.id).pipe(
           map((response: Products) => {
-            return commonActions.ProductsPageActions.addProductToCartSuccess({
+            if (response === null) {
+              this.alertMsg.alertInfo("Removed from Cart");
+            }
+            return commonActions.CartPageActions.removeProductFromCartSuccess({
               data: response,
             });
           }),
           catchError((error: any) =>
-            of(commonActions.ProductsPageActions.addProductToCartFailure(error))
+            of(commonActions.CartPageActions.removeProductFromCartFailure(error))
           )
         )
       )
@@ -176,4 +215,16 @@ export class CommonEffects {
       )
     );
   });
+
+  logoutUser$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(commonActions.AuthPageActions.logoutUser),
+        tap(() => {
+          this.authservice.logout();
+        })
+      );
+    },
+    { dispatch: false }
+  );
 }

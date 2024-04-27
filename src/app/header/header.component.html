@@ -13,22 +13,25 @@
     </button>
     <div [(ngbCollapse)]="isCollapsed" class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a [routerLink]="'/products'" class="nav-link" *ngIf="isAuthenticated"
-            ><i class="fab fa-product-hunt"></i> Products</a
-          >
-        </li>
+        @if(userdetails){
+          <li class="nav-item">
+            <a [routerLink]="'/products'" class="nav-link"
+              ><i class="fab fa-product-hunt"></i> Products</a
+            >
+          </li>
+        
+        
         <li class="nav-item ngbDropdown" ngbDropdown>
-          <a
+            <a
             class="nav-link"
             tabindex="0"
             id="navbarDropdown3"
             ngbDropdownToggle
             role="button"
-            *ngIf="isAuthenticated"
           >
-            <i class="bi bi-person-circle"></i> {{ userEmail }}
+            <i class="bi bi-person-circle"></i> {{ userdetails.email }}
           </a>
+          
           <div
             ngbDropdownMenu
             aria-labelledby="navbarDropdown3"
@@ -45,16 +48,19 @@
             >
           </div>
         </li>
-        <li class="nav-item" routerLinkActive="active" *ngIf="!isAuthenticated">
+      } @else {
+        <li class="nav-item" routerLinkActive="active">
           <a [routerLink]="'/auth'" class="nav-link"
             ><i class="bi bi-box-arrow-in-right"></i> Login</a
           >
         </li>
-        <li class="nav-item" routerLinkActive="active">
-          <a [routerLink]="'/contact'" class="nav-link"
-            ><i class="bi bi-question-circle"></i> Contact Us</a
-          >
-        </li>
+       
+      }
+      <li class="nav-item" routerLinkActive="active">
+        <a [routerLink]="'/contact'" class="nav-link"
+          ><i class="bi bi-question-circle"></i> Contact Us</a
+        >
+      </li>
       </ul>
     </div>
   </div>

@@ -1,12 +1,12 @@
-import { Injectable } from "@angular/core";
+import { Injectable, OnDestroy } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Router } from "@angular/router";
-import { catchError, tap } from "rxjs/operators";
-import { throwError, BehaviorSubject } from "rxjs";
-
-import { User } from "./user.model";
+import { catchError, map } from "rxjs/operators";
+import { throwError,Subject, takeUntil } from "rxjs";
+import { Store } from '@ngrx/store';
 import { environment } from "src/environments/environment";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { AuthUserState } from "../store/common.reducers";
 
 export interface AuthResponseData {
   kind: string;
@@ -20,32 +20,29 @@ export interface AuthResponseData {
 }
 
 @Injectable({ providedIn: "root" })
-export class AuthService {
-  user = new BehaviorSubject<User>(null);
+export class AuthService implements OnDestroy {
   private tokenExpirationTimer: any;
   auth_url = environment.firebase_auth;
   apiKey = environment.firebase_key;
+  destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
     private http: HttpClient,
     private router: Router,
-    private modal: NgbModal
+    private modal: NgbModal,
+    
+    private store: Store<{ authuser: AuthUserState }>
   ) {}
+
+  private handleHttpSuccess(res: any): any {
+    return res;
+  }
 
   signup(payload: any) {
     const url = this.auth_url + "accounts:signUp?key=" + this.apiKey;
     return this.http.post<AuthResponseData>(url, payload).pipe(
-      catchError(this.handleError),
-      tap((resData) => {
-        this.handleAuthentication(
-          resData.email,
-          resData.displayName,
-          resData.localId,
-          resData.registered,
-          resData.idToken,
-          +resData.expiresIn
-        );
-      })
+      map(this.handleHttpSuccess),
+      catchError(this.handleError)
     );
   }
 
@@ -53,85 +50,42 @@ export class AuthService {
     const url =
       this.auth_url + "accounts:signInWithPassword?key=" + this.apiKey;
     return this.http.post<AuthResponseData>(url, payload).pipe(
-      catchError(this.handleError),
-      tap((resData) => {
-        this.handleAuthentication(
-          resData.email,
-          resData.displayName,
-          resData.localId,
-          resData.registered,
-          resData.idToken,
-          +resData.expiresIn
-        );
-      })
+      map(this.handleHttpSuccess),
+      catchError(this.handleError)
     );
   }
 
-  chngpswd(confPswd: string) {
+  chngpswd(payload: any) {
     const url = this.auth_url + "accounts:update?key=" + this.apiKey;
-    const payload = {
-      idToken: this.user.value.token,
-      password: confPswd,
-      returnSecureToken: true,
-    };
     return this.http.post<AuthResponseData>(url, payload).pipe(
-      catchError(this.handleError),
-      tap((resData) => {
-        this.handleAuthentication(
-          resData.email,
-          resData.displayName,
-          resData.localId,
-          resData.registered,
-          resData.idToken,
-          +resData.expiresIn
-        );
-      })
+      map(this.handleHttpSuccess),
+      catchError(this.handleError)
     );
   }
 
   autoLogin() {
-    const userData: {
-      email: string;
-      displayName: string;
-      id: string;
-      registered: boolean;
-      _token: string;
-      _tokenExpirationDate: string;
-    } = JSON.parse(localStorage.getItem("userData"));
-    if (!userData) {
-      return;
-    }
-
-    const loadedUser = new User(
-      userData.email,
-      userData.displayName,
-      userData.id,
-      userData.registered,
-      userData._token,
-      new Date(userData._tokenExpirationDate)
-    );
-
-    if (loadedUser.token) {
-      this.user.next(loadedUser);
-      const expirationDuration =
-        new Date(userData._tokenExpirationDate).getTime() -
-        new Date().getTime();
-      this.autoLogout(expirationDuration);
-    }
-  }
-
-  getUserInfo() {
-    let user_info = JSON.parse(localStorage.getItem("userData"));
-    this.user.next(user_info);
-    return user_info;
+    this.store.select('authuser').pipe(takeUntil(this.destroy$)).subscribe((res:AuthUserState) => {
+      if(res.loggedInUserDetails){
+        const userData = res.loggedInUserDetails;
+        if (userData.idToken) {
+          const expirationDuration =
+            new Date(userData.expiresIn).getTime() -
+            new Date().getTime();
+          this.autoLogout(expirationDuration);
+        }
+      } else {
+        return;
+      }
+    })
   }
 
   logout() {
-    this.user.next(null);
-    localStorage.removeItem("userData");
+    localStorage.removeItem("authdata");
+    localStorage.removeItem("authdata");
     localStorage.removeItem("prodList");
     this.modal.dismissAll();
-    this.router.navigate(["/"]);
+    this.router.navigate(["auth"]);
+    
     if (this.tokenExpirationTimer) {
       clearTimeout(this.tokenExpirationTimer);
     }
@@ -144,29 +98,7 @@ export class AuthService {
     }, expirationDuration);
   }
 
-  private handleAuthentication(
-    email: string,
-    displayName: string,
-    userId: string,
-    registered: boolean,
-    token: string,
-    expiresIn: number
-  ) {
-    const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
-    const user = new User(
-      email,
-      displayName,
-      userId,
-      registered,
-      token,
-      expirationDate
-    );
-    this.user.next(user);
-    this.autoLogout(expiresIn * 1000);
-    localStorage.setItem("userData", JSON.stringify(user));
-  }
-
-  private handleError(errorRes: HttpErrorResponse) {
+  handleError(errorRes: HttpErrorResponse) {
     let errorMessage = "An unknown error occurred!";
     if (!errorRes.error || !errorRes.error.error) {
       return throwError(() => new Error(errorMessage));
@@ -183,5 +115,10 @@ export class AuthService {
         break;
     }
     return throwError(() => new Error(errorMessage));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 }

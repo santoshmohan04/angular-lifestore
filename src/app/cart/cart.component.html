@@ -34,13 +34,13 @@
             </div>
           </div>
           <div class="divTableCol">
-            <input type="email" class="form-control" [(ngModel)]="item.qty" />
+            <input type="email" class="form-control" [(ngModel)]="item.qty" (ngModelChange)="updateTotal(item)"/>
           </div>
           <div class="divTableCol">
             <strong>Rs.{{ item.price | number }}</strong>
           </div>
           <div class="divTableCol">
-            <strong>Rs.{{ item.qty * item.price }}</strong>
+            <strong>Rs.{{ item.totalamt }}</strong>
           </div>
           <div class="divTableCol">
             <button type="button" class="btn btn-danger" (click)="rmCart(item)">
@@ -56,7 +56,7 @@
           <div class="divTableCol"><h3>Total</h3></div>
           <div class="divTableCol">
             <h3>
-              <strong>Rs.{{ getTotal() | number }}</strong>
+              <strong>Rs.{{ total() }}</strong>
             </h3>
           </div>
         </div>

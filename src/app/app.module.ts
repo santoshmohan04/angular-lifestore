@@ -20,6 +20,7 @@ import {
   NgbCollapseModule,
   NgbDropdownModule,
   NgbCarouselModule,
+  NgbNavModule
 } from "@ng-bootstrap/ng-bootstrap";
 import { AlertsComponent } from "./alerts/alerts.component";
 import { AlertMessageService } from "./alerts/alertmsg.service";
@@ -31,6 +32,8 @@ import { StoreModule } from "@ngrx/store";
 import { EffectsModule } from "@ngrx/effects";
 import { StoreRouterConnectingModule } from "@ngrx/router-store";
 import { StoreDevtoolsModule } from "@ngrx/store-devtools";
+import { commonDataReducer, userReducer } from "./store/common.reducers";
+import { CommonEffects } from "./store/common.effects";
 
 @NgModule({
   declarations: [
@@ -56,8 +59,8 @@ import { StoreDevtoolsModule } from "@ngrx/store-devtools";
     NgbModule,
     NgbCollapseModule,
     NgbCarouselModule,
-    StoreModule.forRoot({}, {}),
-    EffectsModule.forRoot([]),
+    StoreModule.forRoot({ authuser: userReducer, commondata: commonDataReducer }, {}),
+    EffectsModule.forRoot([CommonEffects]),
     StoreRouterConnectingModule.forRoot(),
     StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: !isDevMode() }),
   ],

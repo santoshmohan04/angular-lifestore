@@ -13,6 +13,7 @@ export const AuthPageActions = createActionGroup({
     "Change User Password": props<{ payload: any }>(),
     "Change User Password Success": props<{ data: any }>(),
     "Change User Password Failure": props<{ error: HttpErrorResponse }>(),
+    "Logout User": emptyProps(),
   },
 });
 

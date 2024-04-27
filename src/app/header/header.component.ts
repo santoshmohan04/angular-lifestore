@@ -1,8 +1,11 @@
-import { DatePipe } from "@angular/common";
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { AuthService } from "../services/auth.service";
+import { AuthResponseData } from "../services/auth.service";
 import { AlertMessageService } from "../alerts/alertmsg.service";
+import { Subject, takeUntil } from "rxjs";
+import { Store } from '@ngrx/store';
+import { AuthUserState } from "../store/common.reducers";
+import * as commonactions from "src/app/store/common.actions"
 
 @Component({
   selector: "app-header",
@@ -10,32 +13,26 @@ import { AlertMessageService } from "../alerts/alertmsg.service";
   styleUrls: ["./header.component.css"],
 })
 export class HeaderComponent implements OnInit {
-  isAuthenticated = false;
-  isLoading = false;
   isCollapsed = false;
-  userEmail: string = "";
+  userdetails: AuthResponseData;
   @ViewChild("logout") logout: NgbModal;
+  destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
     private alertMsg: AlertMessageService,
-    private authService: AuthService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private store: Store<{ authuser: AuthUserState }>
   ) {}
 
   ngOnInit(): void {
-    this.authService.getUserInfo();
-    this.authService.user.subscribe({
-      next: (value) => {
-        let user_data = value;
-        this.userEmail = user_data?.email;
-        user_data
-          ? (this.isAuthenticated = true)
-          : (this.isAuthenticated = false);
-      },
-      error: (err) => {
-        this.alertMsg.alertDanger(err);
-      },
-    });
+    this.getUserDetails();
+  }
+
+  getUserDetails(){
+    this.store.select('authuser').pipe(takeUntil(this.destroy$)).subscribe((res) => {
+      res.loggedInUserDetails ? this.userdetails = res.loggedInUserDetails : this.userdetails = null;
+      res.error ? this.alertMsg.alertDanger(res.error) : null;
+    })
   }
 
   openVerticallyCentered(content) {
@@ -44,6 +41,6 @@ export class HeaderComponent implements OnInit {
 
   onLogout() {
     this.modalService.dismissAll();
-    this.authService.logout();
+    this.store.dispatch(commonactions.AuthPageActions.logoutUser());
   }
 }

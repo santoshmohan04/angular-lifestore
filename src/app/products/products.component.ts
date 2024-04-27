@@ -1,49 +1,40 @@
 import {
   AfterViewInit,
   Component,
+  OnDestroy,
   OnInit,
   TemplateRef,
   ViewChild,
   signal,
 } from "@angular/core";
-import { SharedService } from "../services/shared.services";
 import { Products } from "../data/product.data";
 import { AlertMessageService } from "../alerts/alertmsg.service";
+import { Subject, takeUntil } from "rxjs";
+import { Store } from '@ngrx/store';
+import { CommonState } from "../store/common.reducers";
+import * as commonactions from "src/app/store/common.actions"
 
 @Component({
   selector: "app-products",
   templateUrl: "./products.component.html",
   styleUrls: ["./products.component.css"],
 })
-export class ProductsComponent implements OnInit, AfterViewInit {
+export class ProductsComponent implements OnInit, AfterViewInit, OnDestroy {
   displayTemplate = signal<TemplateRef<string>>(null);
-  prodlist: any = "";
-  cam: any = "";
-  st: any = "";
-  wt: any = "";
-  smph: any = "";
+  prodlist: Products;
+  destroy$: Subject<boolean> = new Subject<boolean>();
 
   @ViewChild("spinner") private spinner: TemplateRef<string>;
   @ViewChild("productstemp") private productstemp: TemplateRef<string>;
 
   constructor(
     private alertMsg: AlertMessageService,
-    private shareService: SharedService
+    private store: Store<{ commondata: CommonState }>
   ) {}
 
   ngOnInit() {
-    let prod_data = localStorage.getItem("prodList");
-    console.log("prod_data >>> ", prod_data);
-    if (prod_data) {
-      this.prodlist = JSON.parse(prod_data);
-      this.cam = this.prodlist.cameras;
-      this.st = this.prodlist.shirts;
-      this.wt = this.prodlist.watches;
-      this.smph = this.prodlist.smartphones;
-      this.displayTemplate.set(this.productstemp);
-    } else {
+    this.store.dispatch(commonactions.ProductsPageActions.fetchProducts());
       this.productList();
-    }
   }
 
   ngAfterViewInit(): void {
@@ -51,55 +42,57 @@ export class ProductsComponent implements OnInit, AfterViewInit {
   }
 
   productList() {
-    this.shareService.getProductList().subscribe({
-      next: (responseData: Products) => {
-        localStorage.setItem("prodList", JSON.stringify(responseData));
-        this.prodlist = responseData;
-        this.cam = this.prodlist.cameras;
-        this.st = this.prodlist.shirts;
-        this.wt = this.prodlist.watches;
-        this.smph = this.prodlist.smartphones;
+    this.store.select('commondata').pipe(takeUntil(this.destroy$)).subscribe((res) => {
+      if(res.productslist){
+        this.prodlist = res.productslist;
         this.displayTemplate.set(this.productstemp);
-      },
-      error: (err: any) => {
-        this.alertMsg.alertDanger(err);
-      },
-    });
+      } else if(res.error){
+        console.log(res.error);
+        this.alertMsg.alertDanger(res.error);
+      }
+    })
   }
 
   addtoCart(i: number, action: string) {
     let cust_data = {
       camera: {
-        id: this.cam[i].id,
-        image: this.cam[i].image,
-        name: this.cam[i].name,
-        price: this.cam[i].price,
+        id: this.prodlist.cameras[i].id,
+        image: this.prodlist.cameras[i].image,
+        name: this.prodlist.cameras[i].name,
+        price: this.prodlist.cameras[i].price,
+        qty: 0,
+        totalamt: 0,
       },
       watch: {
-        id: this.wt[i].id,
-        image: this.wt[i].image,
-        name: this.wt[i].name,
-        price: this.wt[i].price,
+        id: this.prodlist.watches[i].id,
+        image: this.prodlist.watches[i].image,
+        name: this.prodlist.watches[i].name,
+        price: this.prodlist.watches[i].price,
+        qty: 0,
+        totalamt: 0,
       },
       shirt: {
-        id: this.st[i].id,
-        image: this.st[i].image,
-        name: this.st[i].name,
-        price: this.st[i].price,
+        id: this.prodlist.shirts[i].id,
+        image: this.prodlist.shirts[i].image,
+        name: this.prodlist.shirts[i].name,
+        price: this.prodlist.shirts[i].price,
+        qty: 0,
+        totalamt: 0,
       },
       smartphone: {
-        id: this.smph[i].id,
-        image: this.smph[i].image,
-        name: this.smph[i].name,
-        price: this.smph[i].price,
+        id: this.prodlist.smartphones[i].id,
+        image: this.prodlist.smartphones[i].image,
+        name: this.prodlist.smartphones[i].name,
+        price: this.prodlist.smartphones[i].price,
+        qty: 0,
+        totalamt: 0,
       },
     };
-    this.shareService.addToCart(cust_data[action]).subscribe({
-      next: (responseData) => {
-        if (responseData.hasOwnProperty("name")) {
-          this.alertMsg.alertSuccess("Added to Cart");
-        }
-      },
-    });
+    this.store.dispatch(commonactions.ProductsPageActions.addProductToCart({payload: cust_data[action]}));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 }

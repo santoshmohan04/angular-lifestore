@@ -1,27 +1,32 @@
 import {
   AfterViewInit,
   Component,
+  OnDestroy,
   OnInit,
   TemplateRef,
   ViewChild,
   signal,
 } from "@angular/core";
 import { AlertMessageService } from "../alerts/alertmsg.service";
-import { SharedService } from "../services/shared.services";
 import { DatePipe } from "@angular/common";
+import { Subject, takeUntil } from "rxjs";
+import { Store } from "@ngrx/store";
+import { CommonState } from "../store/common.reducers";
+import * as commonactions from "src/app/store/common.actions";
 
 @Component({
   selector: "app-cart",
   templateUrl: "./cart.component.html",
   styleUrls: ["./cart.component.css"],
 })
-export class CartComponent implements OnInit, AfterViewInit {
+export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
   displayTemplate = signal<TemplateRef<string>>(null);
   cartKeys: any = [];
   cartValues: any = [];
-  total: number = 0;
+  total = signal<number>(0);
   ordmsg: string = "";
   ordDate = new Date();
+  destroy$: Subject<boolean> = new Subject<boolean>();
 
   @ViewChild("msgtemplate") private msgtemplate: TemplateRef<string>;
   @ViewChild("carttemplate") private carttemplate: TemplateRef<string>;
@@ -30,10 +35,11 @@ export class CartComponent implements OnInit, AfterViewInit {
   constructor(
     private datepipe: DatePipe,
     private alertMsg: AlertMessageService,
-    private shareService: SharedService
+    private store: Store<{ commondata: CommonState }>
   ) {}
 
   ngOnInit(): void {
+    this.store.dispatch(commonactions.CartPageActions.fetchCartItems());
     this.cartItems();
   }
 
@@ -42,55 +48,52 @@ export class CartComponent implements OnInit, AfterViewInit {
   }
 
   cartItems() {
-    this.shareService.getCartItems().subscribe({
-      next: (responseData) => {
-        if (responseData) {
+    this.store
+      .select("commondata")
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((res) => {
+        if (res.cartList && res.cartList !== "No Items") {
+          const responseData = JSON.parse(JSON.stringify(res.cartList));
           this.cartKeys = Object.keys(responseData);
           this.cartValues = Object.values(responseData);
-          this.cartValues.forEach((t: any) => {
-            t.qty = 0;
-            t.item = parseFloat(t.item);
-          });
           if (this.cartValues.length > 0) {
+            this.updateGrandTotal();
             this.displayTemplate.set(this.carttemplate);
           } else {
             this.ordmsg = "No Items Present in the Cart";
+            this.total.set(0);
             this.displayTemplate.set(this.msgtemplate);
           }
-        } else {
+        } else if (res.error) {
+          this.alertMsg.alertDanger(res.error);
+          this.ordmsg = "Some thing went wrong";
+          this.displayTemplate.set(this.msgtemplate);
+        } else if (res.cartList === "No Items") {
+          this.cartKeys = [];
+          this.cartValues = [];
+          this.total.set(0);
+          this.ordmsg = "";
           this.ordmsg = "No Items Present in the Cart";
           this.displayTemplate.set(this.msgtemplate);
+        } else if (res.userorders && res.userorders.name) {
+          this.cartKeys = [];
+          this.cartValues = [];
+          this.total.set(0);
+          this.ordmsg =
+            "Your order is confirmed. Thank you for shopping with us.";
+          this.displayTemplate.set(this.msgtemplate);
         }
-      },
-      error: (err: any) => {
-        this.alertMsg.alertDanger(err);
-        this.ordmsg = "Some thing went wrong";
-        this.displayTemplate.set(this.msgtemplate);
-      },
-    });
-  }
-
-  getTotal() {
-    this.cartValues.forEach((t: any) => {
-      this.total += t.price * t.qty;
-    });
-    return this.total;
+      });
   }
 
   rmCart(x: any) {
     const index = this.cartValues.indexOf(x);
     this.cartValues.splice(index, 1);
     let cartid = this.cartKeys.at(index);
-    this.shareService.removeCartItems(cartid).subscribe({
-      next: (responseData) => {
-        if (responseData == null) {
-          this.alertMsg.alertInfo("Removed from Cart");
-        }
-      },
-      error: (err: any) => {
-        this.alertMsg.alertDanger(err);
-      },
-    });
+    this.store.dispatch(
+      commonactions.CartPageActions.removeProductFromCart({ id: cartid })
+    );
+    this.updateGrandTotal();
   }
 
   conformOrd() {
@@ -98,50 +101,30 @@ export class CartComponent implements OnInit, AfterViewInit {
       items: this.cartValues,
       orddate: this.datepipe.transform(this.ordDate, "medium"),
     };
-    this.shareService.conformOrder(ordData).subscribe({
-      next: (responseData) => {
-        if (responseData.hasOwnProperty("name") === true) {
-          this.shareService.clearCart().subscribe({
-            next: (responseData) => {
-              if (responseData == null) {
-                this.cartKeys = [];
-                this.cartValues = [];
-                this.total = 0;
-                this.ordmsg =
-                  "Your order is confirmed. Thank you for shopping with us.";
-                this.displayTemplate.set(this.msgtemplate);
-              }
-            },
-            error: (err: any) => {
-              console.log("err in clearCart >>> ", err);
-              this.alertMsg.alertDanger(err);
-            },
-          });
-        }
-      },
-      error: (err: any) => {
-        console.log("err in conformOrd >>> ", err);
-        this.alertMsg.alertDanger(err);
-      },
-    });
+    this.store.dispatch(
+      commonactions.UserActions.conformUserOrders({ payload: ordData })
+    );
   }
 
   clearCart() {
-    this.shareService.clearCart().subscribe({
-      next: (responseData) => {
-        if (responseData === null) {
-          this.cartKeys = [];
-          this.cartValues = [];
-          this.total = 0;
-          this.ordmsg = "";
-          this.ordmsg = "No Items Present in the Cart";
-          this.displayTemplate.set(this.msgtemplate);
-        }
-      },
-      error: (err: any) => {
-        console.log("err in clearCart >>> ", err);
-        this.alertMsg.alertDanger(err);
-      },
-    });
+    this.store.dispatch(commonactions.CartPageActions.clearCart());
+  }
+
+  updateTotal(item: any) {
+    item.totalamt = parseFloat(item.price) * item.qty;
+    this.updateGrandTotal();
+  }
+
+  updateGrandTotal() {
+      let sumtotal: number = 0;
+      this.cartValues.forEach((t: any) => {sumtotal = sumtotal + t.totalamt
+      });
+      
+      this.total.update((val) => (val = sumtotal));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 }

@@ -18,7 +18,7 @@ export class SharedService {
         return res;
       }),
       catchError((error) => {
-        throw new Error(error.error);
+        throw new Error(error);
       })
     );
   }
@@ -30,7 +30,7 @@ export class SharedService {
         return res;
       }),
       catchError((error) => {
-        throw new Error(error.error);
+        throw new Error(error);
       })
     );
   }
@@ -42,7 +42,7 @@ export class SharedService {
         return res;
       }),
       catchError((error) => {
-        throw new Error(error.error);
+        throw new Error(error);
       })
     );
   }
@@ -54,7 +54,7 @@ export class SharedService {
         return res;
       }),
       catchError((error) => {
-        throw new Error(error.error);
+        throw new Error(error);
       })
     );
   }
@@ -66,7 +66,7 @@ export class SharedService {
         return res;
       }),
       catchError((error) => {
-        throw new Error(error.error);
+        throw new Error(error);
       })
     );
   }
@@ -78,7 +78,7 @@ export class SharedService {
         return res;
       }),
       catchError((error) => {
-        throw new Error(error.error);
+        throw new Error(error);
       })
     );
   }
@@ -90,7 +90,7 @@ export class SharedService {
         return res;
       }),
       catchError((error) => {
-        throw new Error(error.error);
+        throw new Error(error);
       })
     );
   }
