@@ -11,6 +11,7 @@ import { CartComponent } from "./cart/cart.component";
 const routes: Routes = [
   { path: "", component: MainpageComponent },
   { path: "auth", component: LoginComponent },
+  { path: "signup", component: LoginComponent },
   { path: "products", component: ProductsComponent, canActivate: [AuthGuard] },
   { path: "cart", component: CartComponent, canActivate: [AuthGuard] },
   { path: "settings", component: SettingsComponent, canActivate: [AuthGuard] },

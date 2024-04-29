@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, signal } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { Router } from "@angular/router";
+import { Router, ActivatedRoute } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 import { Store } from '@ngrx/store';
 import { AuthService } from "../services/auth.service";
@@ -13,17 +13,22 @@ import * as commonactions from "src/app/store/common.actions"
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.css"],
 })
-export class LoginComponent implements OnInit, OnDestroy {
-  active = 1;
+export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   authForm: FormGroup;
   signupForm: FormGroup;
-  isLoading = false;
   isChecked = false;
   showPassword: boolean;
+  displayTemplate = signal<TemplateRef<string>>(null);
   destroy$: Subject<boolean> = new Subject<boolean>();
+
+  @ViewChild('logintemp') private logintemp: TemplateRef<string>;
+  @ViewChild('signuptemp') private signuptemp: TemplateRef<string>;
+  @ViewChild('loadingtemp') private loadingtemp: TemplateRef<string>;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route:ActivatedRoute,
     private authService: AuthService,
     private alertMsg: AlertMessageService,
     private store: Store<{ authuser: AuthUserState }>
@@ -69,13 +74,24 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.store.select('authuser').pipe(takeUntil(this.destroy$)).subscribe((res) => {
       if(res.loggedInUserDetails){
-        this.isLoading = false;
         this.router.navigate(["/products"]);
       } else if(res.error){
-        this.isLoading = false;
+        if(this.router.url.includes('signup')){
+          this.displayTemplate.set(this.signuptemp);
+        } else {
+          this.displayTemplate.set(this.logintemp);
+        }
         this.alertMsg.alertDanger(res.error);
       }
     })
+  }
+
+  ngAfterViewInit(): void {
+    if(this.router.url.includes('signup')){
+      this.displayTemplate.set(this.signuptemp);
+    } else {
+      this.displayTemplate.set(this.logintemp);
+    }
   }
 
   onlogin(form: FormGroup) {
@@ -93,7 +109,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       localStorage.setItem("usr", JSON.stringify(payload));
     }
 
-    this.isLoading = true;
+    this.displayTemplate.set(this.loadingtemp);
     const loginpayload = {
       email: email,
       password: password,
@@ -111,7 +127,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     const email = form.value.sigupEmail;
     const password = form.value.signupPswd;
 
-    this.isLoading = true;
+    this.displayTemplate.set(this.loadingtemp);
     const signuppayload = {
       email: email,
       password: password,
