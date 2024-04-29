@@ -1,0 +1,62 @@
+<div class="container-fluid">
+  <ngb-carousel>
+		<ng-template ngbSlide>
+			<div class="picsum-img-wrapper">
+        <img
+        class="d-block w-100"
+        src="assets/img/intro-bg_1_.jpg"
+        alt="First slide"
+        height="500px"
+      />
+			</div>
+      <div class="carousel-caption">
+				<h1>We sell lifestyle.</h1>
+        <p>Flat 40% OFF on premium brands</p>
+        <a routerLink="/products" class="btn btn-danger btn-lg active">Shop Now</a>
+			</div>
+		</ng-template>
+		<ng-template ngbSlide>
+			<div class="picsum-img-wrapper">
+        <img
+        class="d-block w-100"
+        src="assets/img/sale-banner.jpg"
+        alt="Second slide"
+        height="500px"
+      />
+			</div>
+		</ng-template>
+		<ng-template ngbSlide>
+			<div class="picsum-img-wrapper">
+        <img
+        class="d-block w-100"
+        src="assets/img/pr.png"
+        alt="Third slide"
+        height="500px"
+      />
+			</div>
+		</ng-template>
+	</ngb-carousel>
+  <!--Item categories listing-->
+  <div class="m-4">
+    <div class="row text-center" id="item_list">
+      @for(x of products; track x.id){
+        <div class="col-sm-3" >
+          <div class="card mb-3">
+            <img
+              [src]="x.image"
+              class="card-img-top"
+              [alt]="x.name"
+              height="150px"
+            />
+            <div class="card-body text-center">
+              <h5 class="card-title">{{ x.name }}</h5>
+              <p class="card-text">{{ x.title }}</p>
+              <a routerLink="/products" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+  <!--Item categories listing end-->
+</div>

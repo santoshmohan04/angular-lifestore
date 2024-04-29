@@ -1,0 +1,97 @@
+<div class="containerblock">
+  <ng-container [ngTemplateOutlet]="displayTemplate()"></ng-container>
+  <ng-template #msgtemplate>
+    <h2>
+      <span>{{ ordmsg }}</span>
+    </h2>
+  </ng-template>
+
+  <ng-template #carttemplate>
+    <h2>Shopping Cart ({{ cartValues.length }} item/s in your cart)</h2>
+    <div class="container">
+      <div class="divTable div-hover">
+        <div class="rowTable bg-primary text-white pb-2">
+          <div class="divTableCol">Product</div>
+          <div class="divTableCol">Quantity</div>
+          <div class="divTableCol">Price</div>
+          <div class="divTableCol">Total</div>
+          <div class="divTableCol">Actions</div>
+        </div>
+        @for(item of cartValues; track item.id){
+        <div class="rowTable">
+          <div class="divTableCol">
+            <div class="media d-flex">
+              <a class="pull-left mr-2 ml-0"
+                ><img
+                  class="img-fluid"
+                  src="assets/{{ item.image }}"
+                  alt="product"
+                  style="width: 92px; height: 72px; margin-left: 0"
+              /></a>
+              <div class="media-body">
+                <h4 class="media-heading">{{ item.name }}</h4>
+              </div>
+            </div>
+          </div>
+          <div class="divTableCol">
+            <input type="email" class="form-control" [(ngModel)]="item.qty" (ngModelChange)="updateTotal(item)"/>
+          </div>
+          <div class="divTableCol">
+            <strong>Rs.{{ item.price | number }}</strong>
+          </div>
+          <div class="divTableCol">
+            <strong>Rs.{{ item.totalamt }}</strong>
+          </div>
+          <div class="divTableCol">
+            <button type="button" class="btn btn-danger" (click)="rmCart(item)">
+              <span class="fa fa-remove"></span> Remove
+            </button>
+          </div>
+        </div>
+        }
+        <div class="rowTable">
+          <div class="divTableCol"></div>
+          <div class="divTableCol"></div>
+          <div class="divTableCol"></div>
+          <div class="divTableCol"><h3>Total</h3></div>
+          <div class="divTableCol">
+            <h3>
+              <strong>Rs.{{ total() }}</strong>
+            </h3>
+          </div>
+        </div>
+        <div class="rowTable">
+          <div class="divTableCol"></div>
+          <div class="divTableCol"></div>
+          <div class="divTableCol"></div>
+          <div class="divTableCol">
+            <button
+              type="button"
+              class="btn btn-danger"
+              (click)="clearCart()"
+              [disabled]="cartValues.length === 0"
+            >
+              Clear
+            </button>
+          </div>
+          <div class="divTableCol">
+            <button
+              type="button"
+              class="btn btn-success"
+              (click)="conformOrd()"
+              [disabled]="total === 0"
+            >
+              Confirm Order
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #spinner>
+    <div class="loader">
+      <app-loading-spinner></app-loading-spinner>
+    </div>
+  </ng-template>
+</div>
