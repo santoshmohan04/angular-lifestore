@@ -4,8 +4,8 @@ import { AuthResponseData } from "../services/auth.service";
 import { AlertMessageService } from "../alerts/alertmsg.service";
 import { Subject, takeUntil } from "rxjs";
 import { Store } from '@ngrx/store';
-import { AuthUserState } from "../store/common.reducers";
 import * as commonactions from "src/app/store/common.actions"
+import { selectAuthStatus } from "../store/common.selectors";
 
 @Component({
   selector: "app-header",
@@ -21,7 +21,7 @@ export class HeaderComponent implements OnInit {
   constructor(
     private alertMsg: AlertMessageService,
     private modalService: NgbModal,
-    private store: Store<{ authuser: AuthUserState }>
+    private store: Store
   ) {}
 
   ngOnInit(): void {
@@ -29,7 +29,7 @@ export class HeaderComponent implements OnInit {
   }
 
   getUserDetails(){
-    this.store.select('authuser').pipe(takeUntil(this.destroy$)).subscribe((res) => {
+    this.store.select(selectAuthStatus).pipe(takeUntil(this.destroy$)).subscribe((res) => {
       res.loggedInUserDetails ? this.userdetails = res.loggedInUserDetails : this.userdetails = null;
       res.error ? this.alertMsg.alertDanger(res.error) : null;
     })

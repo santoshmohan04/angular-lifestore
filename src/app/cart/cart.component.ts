@@ -11,8 +11,8 @@ import { AlertMessageService } from "../alerts/alertmsg.service";
 import { DatePipe } from "@angular/common";
 import { Subject, takeUntil } from "rxjs";
 import { Store } from "@ngrx/store";
-import { CommonState } from "../store/common.reducers";
 import * as commonactions from "src/app/store/common.actions";
+import { selectCommonStatus } from "../store/common.selectors";
 
 @Component({
   selector: "app-cart",
@@ -35,7 +35,7 @@ export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private datepipe: DatePipe,
     private alertMsg: AlertMessageService,
-    private store: Store<{ commondata: CommonState }>
+    private store: Store
   ) {}
 
   ngOnInit(): void {
@@ -49,7 +49,7 @@ export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
 
   cartItems() {
     this.store
-      .select("commondata")
+      .select(selectCommonStatus)
       .pipe(takeUntil(this.destroy$))
       .subscribe((res) => {
         if (res.cartList && res.cartList !== "No Items") {
@@ -120,7 +120,7 @@ export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cartValues.forEach((t: any) => {sumtotal = sumtotal + t.totalamt
       });
       
-      this.total.update((val) => (val = sumtotal));
+      this.total.update((val) => sumtotal);
   }
 
   ngOnDestroy(): void {

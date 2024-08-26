@@ -8,16 +8,16 @@ import {
 } from '@angular/common/http';
 import { take, exhaustMap, tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { AuthUserState } from "../store/common.reducers";
 import * as commonactions from "src/app/store/common.actions";
 import { AlertMessageService } from '../alerts/alertmsg.service';
+import { selectAuthStatus } from '../store/common.selectors';
 
 @Injectable()
 export class AuthInterceptorService implements HttpInterceptor {
-  constructor(private alertmsg: AlertMessageService, private store: Store<{ authuser: AuthUserState }>) {}
+  constructor(private alertmsg: AlertMessageService, private store: Store) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
-    return this.store.select('authuser').pipe(
+    return this.store.select(selectAuthStatus).pipe(
       take(1),
       exhaustMap((user) => {
         if (!user.loggedInUserDetails) {

@@ -4,8 +4,8 @@ import { AuthService, AuthResponseData } from "../services/auth.service";
 import { Subject, takeUntil } from "rxjs";
 import { Store } from '@ngrx/store';
 import { AlertMessageService } from "../alerts/alertmsg.service";
-import { AuthUserState, CommonState } from "../store/common.reducers";
 import * as commonactions from "src/app/store/common.actions"
+import { selectAuthStatus, selectCommonStatus } from "../store/common.selectors";
 
 @Component({
   selector: "app-settings",
@@ -24,7 +24,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   constructor(
     public authService: AuthService,
     private alertMsg: AlertMessageService,
-    private store: Store<{ commondata: CommonState, authuser: AuthUserState }>
+    private store: Store
   ) {}
 
   ngOnInit(): void {
@@ -33,7 +33,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   getUserDetails(){
-    this.store.select('authuser').pipe(takeUntil(this.destroy$)).subscribe((res) => {
+    this.store.select(selectAuthStatus).pipe(takeUntil(this.destroy$)).subscribe((res) => {
       if(res.loggedInUserDetails){
         this.userdetails = res.loggedInUserDetails;
         this.store.dispatch(commonactions.UserActions.fetchUserOrders());
@@ -45,7 +45,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   getOrds() {
-    this.store.select('commondata').pipe(takeUntil(this.destroy$)).subscribe((res) => {
+    this.store.select(selectCommonStatus).pipe(takeUntil(this.destroy$)).subscribe((res) => {
       if(res.userorders){
         this.isLoading = false;
         this.userOrds = Object.values(res.userorders);

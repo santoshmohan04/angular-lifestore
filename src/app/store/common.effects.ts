@@ -23,10 +23,6 @@ export class CommonEffects {
       exhaustMap((action) =>
         this.authservice.login(action.payload).pipe(
           map((response: AuthResponseData) => {
-            if(response.expiresIn){
-              this.authservice.autoLogout(parseInt(response.expiresIn) * 1000);
-              localStorage.setItem("authdata", JSON.stringify(response));
-            }
             return commonActions.AuthPageActions.loginUserSuccess({
               data: response,
             });
@@ -73,7 +69,6 @@ export class CommonEffects {
               );
               this.authservice.logout();
             }
-            
             return commonActions.AuthPageActions.signupUserSuccess({
               data: response,
             });

@@ -3,10 +3,9 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 import { Store } from '@ngrx/store';
-import { AuthService } from "../services/auth.service";
 import { AlertMessageService } from "../alerts/alertmsg.service";
-import { AuthUserState } from "../store/common.reducers";
 import * as commonactions from "src/app/store/common.actions"
+import { selectAuthStatus } from "../store/common.selectors";
 
 @Component({
   selector: "app-login",
@@ -28,14 +27,12 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private route:ActivatedRoute,
-    private authService: AuthService,
     private alertMsg: AlertMessageService,
-    private store: Store<{ authuser: AuthUserState }>
+    private store: Store
   ) {}
 
   ngOnInit(): void {
-    this.authService.autoLogin();
+    // this.authService.autoLogin();
     this.authForm = this.fb.group({
       userEmail: [
         null,
@@ -72,8 +69,9 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isChecked = true;
     }
 
-    this.store.select('authuser').pipe(takeUntil(this.destroy$)).subscribe((res) => {
+    this.store.select(selectAuthStatus).pipe(takeUntil(this.destroy$)).subscribe((res) => {
       if(res.loggedInUserDetails){
+        localStorage.setItem("authdata", JSON.stringify(res.loggedInUserDetails));
         this.router.navigate(["/products"]);
       } else if(res.error){
         if(this.router.url.includes('signup')){
@@ -134,7 +132,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       returnSecureToken: true,
     };
     this.store.dispatch(commonactions.AuthPageActions.signupUser({payload: signuppayload}));
-
     form.reset();
   }
 

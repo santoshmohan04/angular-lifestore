@@ -11,8 +11,8 @@ import { Products } from "../data/product.data";
 import { AlertMessageService } from "../alerts/alertmsg.service";
 import { Subject, takeUntil } from "rxjs";
 import { Store } from '@ngrx/store';
-import { CommonState } from "../store/common.reducers";
 import * as commonactions from "src/app/store/common.actions"
+import { selectCommonStatus } from "../store/common.selectors";
 
 @Component({
   selector: "app-products",
@@ -29,12 +29,12 @@ export class ProductsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private alertMsg: AlertMessageService,
-    private store: Store<{ commondata: CommonState }>
+    private store: Store
   ) {}
 
   ngOnInit() {
     this.store.dispatch(commonactions.ProductsPageActions.fetchProducts());
-      this.productList();
+    this.productList();
   }
 
   ngAfterViewInit(): void {
@@ -42,12 +42,11 @@ export class ProductsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   productList() {
-    this.store.select('commondata').pipe(takeUntil(this.destroy$)).subscribe((res) => {
+    this.store.select(selectCommonStatus).pipe(takeUntil(this.destroy$)).subscribe((res) => {
       if(res.productslist){
         this.prodlist = res.productslist;
         this.displayTemplate.set(this.productstemp);
       } else if(res.error){
-        console.log(res.error);
         this.alertMsg.alertDanger(res.error);
       }
     })

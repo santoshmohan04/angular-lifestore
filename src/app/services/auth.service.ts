@@ -7,6 +7,7 @@ import { Store } from '@ngrx/store';
 import { environment } from "src/environments/environment";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { AuthUserState } from "../store/common.reducers";
+import { selectAuthStatus } from "../store/common.selectors";
 
 export interface AuthResponseData {
   kind: string;
@@ -16,6 +17,7 @@ export interface AuthResponseData {
   refreshToken: string;
   expiresIn: string;
   localId: string;
+  profilePicture?: string;
   registered?: boolean;
 }
 
@@ -30,8 +32,7 @@ export class AuthService implements OnDestroy {
     private http: HttpClient,
     private router: Router,
     private modal: NgbModal,
-    
-    private store: Store<{ authuser: AuthUserState }>
+    private store: Store
   ) {}
 
   private handleHttpSuccess(res: any): any {
@@ -64,7 +65,7 @@ export class AuthService implements OnDestroy {
   }
 
   autoLogin() {
-    this.store.select('authuser').pipe(takeUntil(this.destroy$)).subscribe((res:AuthUserState) => {
+    this.store.select(selectAuthStatus).pipe(takeUntil(this.destroy$)).subscribe((res:AuthUserState) => {
       if(res.loggedInUserDetails){
         const userData = res.loggedInUserDetails;
         if (userData.idToken) {

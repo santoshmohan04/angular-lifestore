@@ -140,3 +140,11 @@ export const commonDataReducer = createReducer(
     error: null
   })),
 );
+
+export function commonuserreducer(state: AuthUserState | undefined, action: Action): any {
+  return userReducer(state, action);
+}
+
+export function commondatareducer(state: CommonState | undefined, action: Action): any {
+  return commonDataReducer(state, action);
+}
