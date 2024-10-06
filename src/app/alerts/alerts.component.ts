@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-
+import { Component, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AlertMessageService } from './alertmsg.service';
 
@@ -8,92 +7,54 @@ import { AlertMessageService } from './alertmsg.service';
   templateUrl: './alerts.component.html',
   styleUrls: ['./alerts.component.scss'],
 })
-export class AlertsComponent implements OnInit {
-  isSuccess: boolean = false;
-  isUpdated: boolean = false;
-  isError: boolean = false;
-  isWarning: boolean = false;
-  successMsg: any;
-  warningMsg: any;
-  errorMsg: any;
-  infoMsg: any;
-  subscription: Subscription;
 
-  constructor(private alertMsg: AlertMessageService) {
-    this.subscription = this.alertMsg
-      .successClickEvent()
-      .subscribe((data: any) => {
-        this.alertSuccess(data);
-      });
+export class AlertsComponent implements OnDestroy {
+  alertType: 'success' | 'updated' | 'error' | 'warning' | null = null;
+  alertClasses = {
+    success: 'bg-success',
+    updated: 'bg-updated',
+    error: 'bg-error',
+    warning: 'bg-warning'
+  };
+  
+  alertIcons = {
+    success: '../../assets/Images/successfully-icon.png',
+    updated: '../../assets/Images/updated-icon.png',
+    error: '../../assets/Images/error-icon.png',
+    warning: '../../assets/Images/warning-icon.png'
+  };
+  
+  alertTitles = {
+    success: 'Successfully',
+    updated: 'Updated',
+    error: 'Oh Snap!',
+    warning: 'Warning'
+  };
+  alertMessage: string = '';
+  subscriptions: Subscription[] = [];
 
-    this.subscription = this.alertMsg
-      .dangerClickEvent()
-      .subscribe((data: any) => {
-        this.alertDanger(data);
-      });
-
-    this.subscription = this.alertMsg
-      .warningClickEvent()
-      .subscribe((data: any) => {
-        this.alertWarning(data);
-      });
-
-    this.subscription = this.alertMsg
-      .infoClickEvent()
-      .subscribe((data: any) => {
-        this.alertInfo(data);
-      });
+  constructor(private readonly alertMsg: AlertMessageService) {
+      // Combine all alert event subscriptions into one
+    this.subscriptions.push(
+      this.alertMsg.successClickEvent().subscribe((data: any) => this.showAlert('success', data)),
+      this.alertMsg.dangerClickEvent().subscribe((data: any) => this.showAlert('error', data)),
+      this.alertMsg.warningClickEvent().subscribe((data: any) => this.showAlert('warning', data)),
+      this.alertMsg.infoClickEvent().subscribe((data: any) => this.showAlert('updated', data))
+    );
   }
 
-  ngOnInit(): void { }
-
-  alertSuccess(data: any) {
-    this.successMsg = data;
-    this.isSuccess = true;
-    // console.log('Message >>', this.successMsg);
-    setTimeout(() => {
-      this.successMsg = '';
-      this.isSuccess = false;
-    }, 3000);
-  }
-
-  alertDanger(data: any) {
-    this.errorMsg = data;
-    this.isError = true;
-    setTimeout(() => {
-      this.errorMsg = '';
-      this.isError = false;
-    }, 3000);
-  }
-
-  alertWarning(data: any) {
-    this.warningMsg = data;
-    this.isWarning = true;
-    setTimeout(() => {
-      this.warningMsg = '';
-      this.isWarning = false;
-    }, 3000);
-  }
-
-  alertInfo(data: any) {
-    this.infoMsg = data;
-    this.isUpdated = true;
-    setTimeout(() => {
-      this.infoMsg = '';
-      this.isUpdated = false;
-    }, 3000);
+  showAlert(type: 'success' | 'updated' | 'error' | 'warning', message: string) {
+    this.alertType = type;
+    this.alertMessage = message;
+    setTimeout(() => this.closeAlert(), 3000);
   }
 
   closeAlert() {
-    this.isSuccess = false;
-    this.isUpdated = false;
-    this.isError = false;
-    this.isWarning = false;
+    this.alertType = null;
+    this.alertMessage = '';
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 }

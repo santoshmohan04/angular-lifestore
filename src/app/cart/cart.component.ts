@@ -36,7 +36,7 @@ export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
     private datepipe: DatePipe,
     private alertMsg: AlertMessageService,
     private store: Store
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.store.dispatch(commonactions.CartPageActions.fetchCartItems());
@@ -116,11 +116,12 @@ export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateGrandTotal() {
-      let sumtotal: number = 0;
-      this.cartValues.forEach((t: any) => {sumtotal = sumtotal + t.totalamt
-      });
-      
-      this.total.update((val) => sumtotal);
+    let sumtotal: number = 0;
+    this.cartValues.forEach((t: any) => {
+      sumtotal = sumtotal + parseFloat(t.totalamt)
+    });
+
+    this.total.update((val) => sumtotal);
   }
 
   ngOnDestroy(): void {
