@@ -1,11 +1,5 @@
 import { Injectable } from '@angular/core';
-import {
-  HttpInterceptor,
-  HttpRequest,
-  HttpHandler,
-  HttpParams,
-  HttpErrorResponse,
-} from '@angular/common/http';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { take, exhaustMap, tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import * as commonactions from "src/app/store/common.actions";

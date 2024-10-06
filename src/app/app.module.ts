@@ -9,7 +9,7 @@ import { FooterComponent } from "./footer/footer.component";
 import { MainpageComponent } from "./mainpage/mainpage.component";
 import { ProductsComponent } from "./products/products.component";
 import { SettingsComponent } from "./settings/settings.component";
-import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { DatePipe } from "@angular/common";
 import { LoadingSpinnerComponent } from "./loading-spinner/loading-spinner.component";
 import { AuthInterceptorService } from "./services/auth-interceptor.service";
@@ -33,46 +33,40 @@ import { StoreDevtoolsModule } from "@ngrx/store-devtools";
 import { CommonEffects } from "./store/common.effects";
 import * as fromApp from './store/app.reducer';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    HeaderComponent,
-    FooterComponent,
-    AlertsComponent,
-    MainpageComponent,
-    ProductsComponent,
-    SettingsComponent,
-    LoadingSpinnerComponent,
-    ContactComponent,
-    LoginComponent,
-    CartComponent,
-  ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    ReactiveFormsModule,
-    AppRoutingModule,
-    HttpClientModule,
-    NgbDropdownModule,
-    NgbModule,
-    NgbCollapseModule,
-    NgbCarouselModule,
-    StoreModule.forRoot(fromApp.appReducer),
-    EffectsModule.forRoot([CommonEffects]),
-    StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: !isDevMode() }),
-  ],
-  providers: [
-    AuthService,
-    AuthGuard,
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptorService,
-      multi: true,
-    },
-    DatePipe,
-    AlertMessageService,
-    SharedService,
-  ],
-  bootstrap: [AppComponent],
-})
+@NgModule({ declarations: [
+        AppComponent,
+        HeaderComponent,
+        FooterComponent,
+        AlertsComponent,
+        MainpageComponent,
+        ProductsComponent,
+        SettingsComponent,
+        LoadingSpinnerComponent,
+        ContactComponent,
+        LoginComponent,
+        CartComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        FormsModule,
+        ReactiveFormsModule,
+        AppRoutingModule,
+        NgbDropdownModule,
+        NgbModule,
+        NgbCollapseModule,
+        NgbCarouselModule,
+        StoreModule.forRoot(fromApp.appReducer),
+        EffectsModule.forRoot([CommonEffects]),
+        StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: !isDevMode() })], providers: [
+        AuthService,
+        AuthGuard,
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: AuthInterceptorService,
+            multi: true,
+        },
+        DatePipe,
+        AlertMessageService,
+        SharedService,
+        provideHttpClient(withInterceptorsFromDi()),
+    ] })
 export class AppModule {}
