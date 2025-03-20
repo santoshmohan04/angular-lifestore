@@ -11,10 +11,10 @@ import { AlertMessageService } from "../alerts/alertmsg.service";
 @Injectable()
 export class CommonEffects {
   constructor(
-    private actions$: Actions,
-    private authservice: AuthService,
-    private alertMsg: AlertMessageService,
-    private shareservice: SharedService
+    private readonly actions$: Actions,
+    private readonly authservice: AuthService,
+    private readonly alertMsg: AlertMessageService,
+    private readonly shareservice: SharedService
   ) {}
 
   loginUser$ = createEffect(() => {
@@ -22,22 +22,25 @@ export class CommonEffects {
       ofType(commonActions.AuthPageActions.loginUser),
       exhaustMap((action) =>
         this.authservice.login(action.payload).pipe(
-          map((response: AuthResponseData) => {
-            if(response.expiresIn){
-              this.authservice.autoLogout(parseInt(response.expiresIn) * 1000);
-              localStorage.setItem("authdata", JSON.stringify(response));
+          tap((response: AuthResponseData) => {
+            if (response.expiresIn) {
+              const expiresInMs = parseInt(response.expiresIn, 10) * 1000;
+              if (!isNaN(expiresInMs)) {
+                this.authservice.autoLogout(expiresInMs);
+                localStorage.setItem("authdata", JSON.stringify(response));
+              }
             }
-            return commonActions.AuthPageActions.loginUserSuccess({
-              data: response,
-            });
           }),
-          catchError((error: any) =>
-            of(commonActions.AuthPageActions.loginUserFailure(error))
-          )
+          map((response: AuthResponseData) =>
+            commonActions.AuthPageActions.loginUserSuccess({ data: response })
+          ),
+          catchError((error: any) => {
+            return of(commonActions.AuthPageActions.loginUserFailure({ error })); // Ensure it returns an observable
+          })
         )
       )
     );
-  });
+  });  
 
   signupUser$ = createEffect(() => {
     return this.actions$.pipe(

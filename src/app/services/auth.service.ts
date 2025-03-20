@@ -27,11 +27,11 @@ export class AuthService implements OnDestroy {
   destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
-    private http: HttpClient,
-    private router: Router,
-    private modal: NgbModal,
+    private readonly http: HttpClient,
+    private readonly router: Router,
+    private readonly modal: NgbModal,
     
-    private store: Store<{ authuser: AuthUserState }>
+    private readonly store: Store<{ authuser: AuthUserState }>
   ) {}
 
   private handleHttpSuccess(res: any): any {
@@ -100,7 +100,7 @@ export class AuthService implements OnDestroy {
 
   handleError(errorRes: HttpErrorResponse) {
     let errorMessage = "An unknown error occurred!";
-    if (!errorRes.error || !errorRes.error.error) {
+    if (!errorRes.error) {
       return throwError(() => new Error(errorMessage));
     }
     switch (errorRes.error.error.message) {
@@ -114,6 +114,7 @@ export class AuthService implements OnDestroy {
         errorMessage = "This password is not correct.";
         break;
     }
+    console.log("errMsg", errorMessage, errorRes);
     return throwError(() => new Error(errorMessage));
   }
 

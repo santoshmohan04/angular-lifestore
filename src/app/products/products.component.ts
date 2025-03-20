@@ -10,9 +10,9 @@ import {
 import { Products } from "../data/product.data";
 import { AlertMessageService } from "../alerts/alertmsg.service";
 import { Subject, takeUntil } from "rxjs";
-import { Store } from '@ngrx/store';
+import { Store } from "@ngrx/store";
 import { CommonState } from "../store/common.reducers";
-import * as commonactions from "src/app/store/common.actions"
+import * as commonactions from "src/app/store/common.actions";
 
 @Component({
   selector: "app-products",
@@ -24,17 +24,17 @@ export class ProductsComponent implements OnInit, AfterViewInit, OnDestroy {
   prodlist: Products;
   destroy$: Subject<boolean> = new Subject<boolean>();
 
-  @ViewChild("spinner") private spinner: TemplateRef<string>;
-  @ViewChild("productstemp") private productstemp: TemplateRef<string>;
+  @ViewChild("spinner") private readonly spinner: TemplateRef<string>;
+  @ViewChild("productstemp") private readonly productstemp: TemplateRef<string>;
 
   constructor(
-    private alertMsg: AlertMessageService,
-    private store: Store<{ commondata: CommonState }>
+    private readonly alertMsg: AlertMessageService,
+    private readonly store: Store<{ commondata: CommonState }>
   ) {}
 
   ngOnInit() {
     this.store.dispatch(commonactions.ProductsPageActions.fetchProducts());
-      this.productList();
+    this.productList();
   }
 
   ngAfterViewInit(): void {
@@ -42,15 +42,17 @@ export class ProductsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   productList() {
-    this.store.select('commondata').pipe(takeUntil(this.destroy$)).subscribe((res) => {
-      if(res.productslist){
-        this.prodlist = res.productslist;
-        this.displayTemplate.set(this.productstemp);
-      } else if(res.error){
-        console.log(res.error);
-        this.alertMsg.alertDanger(res.error);
-      }
-    })
+    this.store
+      .select("commondata")
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((res) => {
+        if (res.productslist) {
+          this.prodlist = res.productslist;
+          this.displayTemplate.set(this.productstemp);
+        } else if (res.error) {
+          this.alertMsg.alertDanger(res.error);
+        }
+      });
   }
 
   addtoCart(i: number, action: string) {
@@ -88,7 +90,11 @@ export class ProductsComponent implements OnInit, AfterViewInit, OnDestroy {
         totalamt: 0,
       },
     };
-    this.store.dispatch(commonactions.ProductsPageActions.addProductToCart({payload: cust_data[action]}));
+    this.store.dispatch(
+      commonactions.ProductsPageActions.addProductToCart({
+        payload: cust_data[action],
+      })
+    );
   }
 
   ngOnDestroy(): void {
