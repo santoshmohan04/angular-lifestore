@@ -211,6 +211,24 @@ export class CommonEffects {
     );
   });
 
+  removeCartItem$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(commonActions.UserActions.conformUserOrdersSuccess),
+      exhaustMap(() =>
+        this.shareservice.clearCart().pipe(
+          map((response: Products) => {
+            return commonActions.CartPageActions.clearCartSuccess({
+              data: response,
+            });
+          }),
+          catchError((error: any) =>
+            of(commonActions.CartPageActions.clearCartFailure(error))
+          )
+        )
+      )
+    );
+  });
+
   logoutUser$ = createEffect(
     () => {
       return this.actions$.pipe(

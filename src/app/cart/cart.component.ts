@@ -28,14 +28,14 @@ export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
   ordDate = new Date();
   destroy$: Subject<boolean> = new Subject<boolean>();
 
-  @ViewChild("msgtemplate") private msgtemplate: TemplateRef<string>;
-  @ViewChild("carttemplate") private carttemplate: TemplateRef<string>;
-  @ViewChild("spinner") private spinner: TemplateRef<string>;
+  @ViewChild("msgtemplate") private readonly msgtemplate: TemplateRef<string>;
+  @ViewChild("carttemplate") private readonly carttemplate: TemplateRef<string>;
+  @ViewChild("spinner") private readonly spinner: TemplateRef<string>;
 
   constructor(
-    private datepipe: DatePipe,
-    private alertMsg: AlertMessageService,
-    private store: Store
+    private readonly datepipe: DatePipe,
+    private readonly alertMsg: AlertMessageService,
+    private readonly store: Store
   ) { }
 
   ngOnInit(): void {
@@ -52,39 +52,45 @@ export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
       .select(selectCommonStatus)
       .pipe(takeUntil(this.destroy$))
       .subscribe((res) => {
+        console.log(res);
         if (res.cartList && res.cartList !== "No Items") {
-          const responseData = JSON.parse(JSON.stringify(res.cartList));
-          this.cartKeys = Object.keys(responseData);
-          this.cartValues = Object.values(responseData);
+          this.cartKeys = Object.keys(res.cartList);
+          this.cartValues = Object.values(res.cartList);
+  
           if (this.cartValues.length > 0) {
             this.updateGrandTotal();
             this.displayTemplate.set(this.carttemplate);
           } else {
-            this.ordmsg = "No Items Present in the Cart";
-            this.total.set(0);
-            this.displayTemplate.set(this.msgtemplate);
+            this.showEmptyCartMessage();
           }
         } else if (res.error) {
           this.alertMsg.alertDanger(res.error);
-          this.ordmsg = "Some thing went wrong";
-          this.displayTemplate.set(this.msgtemplate);
-        } else if (res.cartList === "No Items") {
-          this.cartKeys = [];
-          this.cartValues = [];
-          this.total.set(0);
-          this.ordmsg = "";
-          this.ordmsg = "No Items Present in the Cart";
-          this.displayTemplate.set(this.msgtemplate);
-        } else if (res.userorders && res.userorders.name) {
-          this.cartKeys = [];
-          this.cartValues = [];
-          this.total.set(0);
-          this.ordmsg =
-            "Your order is confirmed. Thank you for shopping with us.";
-          this.displayTemplate.set(this.msgtemplate);
+          this.showErrorCartMessage();
+        } else if (res.cartList === "No Items" || res.userorders?.name) {
+          this.showEmptyCartMessage(
+            res.userorders?.name
+              ? "Your order is confirmed. Thank you for shopping with us."
+              : "No Items Present in the Cart"
+          );
         }
       });
   }
+  
+  // Helper method to reduce redundancy
+  private showEmptyCartMessage(message: string = "No Items Present in the Cart") {
+    console.log("Emptyy cart")
+    this.cartKeys = [];
+    this.cartValues = [];
+    this.total.set(0);
+    this.ordmsg = message;
+    this.displayTemplate.set(this.msgtemplate);
+  }
+  
+  // Helper method for error handling
+  private showErrorCartMessage() {
+    this.ordmsg = "Something went wrong";
+    this.displayTemplate.set(this.msgtemplate);
+  }  
 
   rmCart(x: any) {
     const index = this.cartValues.indexOf(x);
