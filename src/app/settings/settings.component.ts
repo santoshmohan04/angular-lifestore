@@ -8,9 +8,10 @@ import * as commonactions from "src/app/store/common.actions"
 import { selectAuthStatus, selectCommonStatus } from "../store/common.selectors";
 
 @Component({
-  selector: "app-settings",
-  templateUrl: "./settings.component.html",
-  styleUrls: ["./settings.component.css"],
+    selector: "app-settings",
+    templateUrl: "./settings.component.html",
+    styleUrls: ["./settings.component.css"],
+    standalone: false
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   isLoading = false;

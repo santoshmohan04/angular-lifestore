@@ -15,9 +15,10 @@ import * as commonactions from "src/app/store/common.actions";
 import { selectCommonStatus } from "../store/common.selectors";
 
 @Component({
-  selector: "app-cart",
-  templateUrl: "./cart.component.html",
-  styleUrls: ["./cart.component.css"],
+    selector: "app-cart",
+    templateUrl: "./cart.component.html",
+    styleUrls: ["./cart.component.css"],
+    standalone: false
 })
 export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
   displayTemplate = signal<TemplateRef<string>>(null);

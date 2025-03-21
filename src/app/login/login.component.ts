@@ -8,9 +8,10 @@ import * as commonactions from "src/app/store/common.actions"
 import { selectAuthStatus } from "../store/common.selectors";
 
 @Component({
-  selector: "app-login",
-  templateUrl: "./login.component.html",
-  styleUrls: ["./login.component.css"],
+    selector: "app-login",
+    templateUrl: "./login.component.html",
+    styleUrls: ["./login.component.css"],
+    standalone: false
 })
 export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   authForm: FormGroup;

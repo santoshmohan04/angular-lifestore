@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ProductCategories, Productcatagory } from '../data/product.data';
 
 @Component({
-  selector: 'app-mainpage',
-  templateUrl: './mainpage.component.html',
-  styleUrls: ['./mainpage.component.css'],
+    selector: 'app-mainpage',
+    templateUrl: './mainpage.component.html',
+    styleUrls: ['./mainpage.component.css'],
+    standalone: false
 })
 export class MainpageComponent implements OnInit {
   products: ProductCategories[];
