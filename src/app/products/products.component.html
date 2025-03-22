@@ -7,144 +7,132 @@
 </ng-template>
 
 <ng-template #productstemp>
-  <div class="container-fluid" id="content">
-    <!-- Jumbotron Header -->
-    <div class="mt-4 p-5 bg-primary text-white text-center">
-      <h1>Welcome to our Lifestyle Store!</h1>
-      <p>
-        We have the best cameras, watches and shirts for you. No need to hunt
-        around, we have all in one place.
-      </p>
-    </div>
-    <hr />
-
-    <div class="card">
-      <div class="card-header">
-        <h3><i class="fas fa-camera"></i> Cameras</h3>
-      </div>
-      <div class="card-body">
-        <div class="row text-center" id="cameras">
-          @for(x of prodlist.cameras; let i =$index; track x.id){
-          <div class="col-sm-3">
-            <div class="card mb-3">
-              <img
-                src="assets/{{ x.image }}"
-                alt="{{ x.name }}"
-                class="card-img-top"
-                height="150px"
-              />
-              <div class="card-body text-center">
-                <h3 class="card-title">{{ x.name }}</h3>
-                <p class="card-text">{{ x.price }}</p>
-                <button
-                  type="button"
-                  class="btn btn-block btn-primary"
-                  (click)="addtoCart(x)"
-                >
-                  Add to cart
-                </button>
+  <div class="container" id="content">
+  <div class="d-flex">
+    <div ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills flex-column" orientation="vertical">
+      <ng-container ngbNavItem="cameras">
+        <button ngbNavLink><i class="fas fa-camera"></i> Cameras</button>
+        <ng-template ngbNavContent>
+          <div class="row text-center" id="cameras">
+            @for(x of prodlist.cameras; let i =$index; track x.id){
+            <div class="col-sm-3">
+              <div class="card mb-3">
+                <img
+                  src="assets/{{ x.image }}"
+                  alt="{{ x.name }}"
+                  class="card-img-top"
+                  height="150px"
+                />
+                <div class="card-body text-center">
+                  <h3 class="card-title">{{ x.name }}</h3>
+                  <p class="card-text">Rs.{{ x.price }}</p>
+                  <button
+                    type="button"
+                    class="btn btn-block btn-primary"
+                    (click)="addtoCart(x)"
+                  >
+                    Add to cart
+                  </button>
+                </div>
               </div>
             </div>
+            }
           </div>
-          }
-        </div>
-      </div>
-    </div>
-    <div class="card mt-3">
-      <div class="card-header">
-        <h3><i class="fas fa-clock"></i> Watches</h3>
-      </div>
-      <div class="card-body">
-        <div class="row text-center" id="watches">
-          @for(p of prodlist.watches; let i =$index; track p.id){
-          <div class="col-sm-3">
-            <div class="card mb-3">
-              <img
-                src="assets/{{ p.image }}"
-                alt="{{ p.name }}"
-                class="card-img-top"
-                height="150px"
-              />
-              <div class="card-body text-center">
-                <h3 class="card-title">{{ p.name }}</h3>
-                <p class="card-text">{{ p.price }}</p>
-                <button
-                  type="button"
-                  class="btn btn-block btn-primary"
-                  (click)="addtoCart(p)"
-                >
-                  Add to cart
-                </button>
+        </ng-template>
+      </ng-container>
+      <ng-container ngbNavItem="watches">
+        <button ngbNavLink><i class="fas fa-clock"></i> Watches</button>
+        <ng-template ngbNavContent>
+          <div class="row text-center" id="watches">
+            @for(p of prodlist.watches; let i =$index; track p.id){
+            <div class="col-sm-3">
+              <div class="card mb-3">
+                <img
+                  src="assets/{{ p.image }}"
+                  alt="{{ p.name }}"
+                  class="card-img-top"
+                  height="150px"
+                />
+                <div class="card-body text-center">
+                  <h3 class="card-title">{{ p.name }}</h3>
+                  <p class="card-text">Rs.{{ p.price }}</p>
+                  <button
+                    type="button"
+                    class="btn btn-block btn-primary"
+                    (click)="addtoCart(p)"
+                  >
+                    Add to cart
+                  </button>
+                </div>
               </div>
             </div>
+            }
           </div>
-          }
-        </div>
-      </div>
-    </div>
-    <div class="card mt-3">
-      <div class="card-header">
-        <h3><i class="fas fa-tshirt"></i> Shirts</h3>
-      </div>
-      <div class="card-body">
-        <div class="row text-center" id="shirts">
-          @for(t of prodlist.shirts; let i =$index; track t.id){
-          <div class="col-sm-3">
-            <div class="card mb-3">
-              <img
-                src="assets/{{ t.image }}"
-                alt="{{ t.name }}"
-                class="card-img-top"
-                height="150px"
-              />
-              <div class="card-body text-center">
-                <h3 class="card-title">{{ t.name }}</h3>
-                <p class="card-text">{{ t.price }}</p>
-                <button
-                  type="button"
-                  class="btn btn-block btn-primary"
-                  (click)="addtoCart(t)"
-                >
-                  Add to cart
-                </button>
+        </ng-template>
+      </ng-container>
+      <ng-container ngbNavItem="shirts">
+        <button ngbNavLink><i class="fas fa-tshirt"></i> Shirts</button>
+        <ng-template ngbNavContent>
+          <div class="row text-center" id="shirts">
+            @for(t of prodlist.shirts; let i =$index; track t.id){
+            <div class="col-sm-3">
+              <div class="card mb-3">
+                <img
+                  src="assets/{{ t.image }}"
+                  alt="{{ t.name }}"
+                  class="card-img-top"
+                  height="150px"
+                />
+                <div class="card-body text-center">
+                  <h3 class="card-title">{{ t.name }}</h3>
+                  <p class="card-text">Rs.{{ t.price }}</p>
+                  <button
+                    type="button"
+                    class="btn btn-block btn-primary"
+                    (click)="addtoCart(t)"
+                  >
+                    Add to cart
+                  </button>
+                </div>
               </div>
             </div>
+            }
           </div>
-          }
-        </div>
-      </div>
-    </div>
-    <div class="card mt-3">
-      <div class="card-header">
-        <h3><i class="fas fa-mobile"></i> Smartphones</h3>
-      </div>
-      <div class="card-body">
-        <div class="row text-center" id="smartphones">
-          @for(m of prodlist.smartphones; let i =$index; track m.id){
-          <div class="col-sm-3">
-            <div class="card mb-3">
-              <img
-                src="assets/{{ m.image }}"
-                alt="{{ m.name }}"
-                class="card-img-top"
-                height="200px"
-              />
-              <div class="card-body text-center">
-                <h3 class="card-title">{{ m.name }}</h3>
-                <p class="card-text">{{ m.price }}</p>
-                <button
-                  type="button"
-                  class="btn btn-block btn-primary"
-                  (click)="addtoCart(m)"
-                >
-                  Add to cart
-                </button>
+        </ng-template>
+      </ng-container>
+      <ng-container ngbNavItem="smartphones">
+        <button ngbNavLink><i class="fas fa-mobile"></i> Smartphones</button>
+        <ng-template ngbNavContent>
+          <div class="row text-center" id="smartphones">
+            @for(m of prodlist.smartphones; let i =$index; track m.id){
+            <div class="col-sm-3">
+              <div class="card mb-3">
+                <img
+                  src="assets/{{ m.image }}"
+                  alt="{{ m.name }}"
+                  class="card-img-top"
+                  height="200px"
+                />
+                <div class="card-body text-center">
+                  <h3 class="card-title">{{ m.name }}</h3>
+                  <p class="card-text">Rs.{{ m.price }}</p>
+                  <button
+                    type="button"
+                    class="btn btn-block btn-primary"
+                    (click)="addtoCart(m)"
+                  >
+                    Add to cart
+                  </button>
+                </div>
               </div>
             </div>
+            }
           </div>
-          }
-        </div>
-      </div>
+        </ng-template>
+      </ng-container>
     </div>
+  
+    <div [ngbNavOutlet]="nav" class="ms-4"></div>
   </div>
+</div>
 </ng-template>

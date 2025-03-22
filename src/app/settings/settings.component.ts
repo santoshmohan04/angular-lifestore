@@ -14,6 +14,7 @@ import { selectAuthStatus, selectCommonStatus } from "../store/common.selectors"
     standalone: false
 })
 export class SettingsComponent implements OnInit, OnDestroy {
+  active = 'pswd';
   isLoading = false;
   error: string = null;
   userOrds: any = [];
@@ -24,8 +25,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   constructor(
     public authService: AuthService,
-    private alertMsg: AlertMessageService,
-    private store: Store
+    private readonly alertMsg: AlertMessageService,
+    private readonly store: Store
   ) {}
 
   ngOnInit(): void {

@@ -12,7 +12,7 @@ export class ContactComponent {
   isLoading = false;
   error: string = null;
 
-  constructor(private alertMsg: AlertMessageService) {}
+  constructor(private readonly alertMsg: AlertMessageService) {}
 
 
   onContact(form: NgForm) {

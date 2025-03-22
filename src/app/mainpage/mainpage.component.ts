@@ -10,7 +10,7 @@ import { ProductCategories, Productcatagory } from '../data/product.data';
 export class MainpageComponent implements OnInit {
   products: ProductCategories[];
 
-  constructor(private prod_cat: Productcatagory) {}
+  constructor(private readonly prod_cat: Productcatagory) {}
 
   ngOnInit(): void {
     this.products = this.prod_cat.prod_cat;

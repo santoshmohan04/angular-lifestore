@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, signal } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { Router, ActivatedRoute } from "@angular/router";
+import { Router } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 import { Store } from '@ngrx/store';
 import { AlertMessageService } from "../alerts/alertmsg.service";
@@ -21,19 +21,18 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   displayTemplate = signal<TemplateRef<string>>(null);
   destroy$: Subject<boolean> = new Subject<boolean>();
 
-  @ViewChild('logintemp') private logintemp: TemplateRef<string>;
-  @ViewChild('signuptemp') private signuptemp: TemplateRef<string>;
-  @ViewChild('loadingtemp') private loadingtemp: TemplateRef<string>;
+  @ViewChild('logintemp') private readonly logintemp: TemplateRef<string>;
+  @ViewChild('signuptemp') private readonly signuptemp: TemplateRef<string>;
+  @ViewChild('loadingtemp') private readonly loadingtemp: TemplateRef<string>;
 
   constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private alertMsg: AlertMessageService,
-    private store: Store
+    private readonly fb: FormBuilder,
+    private readonly router: Router,
+    private readonly alertMsg: AlertMessageService,
+    private readonly store: Store
   ) {}
 
   ngOnInit(): void {
-    // this.authService.autoLogin();
     this.authForm = this.fb.group({
       userEmail: [
         null,
@@ -71,10 +70,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.store.select(selectAuthStatus).pipe(takeUntil(this.destroy$)).subscribe((res) => {
-      if(res.loggedInUserDetails){
-        localStorage.setItem("authdata", JSON.stringify(res.loggedInUserDetails));
-        this.router.navigate(["/products"]);
-      } else if(res.error){
+      if(res.error){
         if(this.router.url.includes('signup')){
           this.displayTemplate.set(this.signuptemp);
         } else {

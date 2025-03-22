@@ -20,6 +20,7 @@ import {
   NgbCollapseModule,
   NgbDropdownModule,
   NgbCarouselModule,
+  NgbNavModule
 } from "@ng-bootstrap/ng-bootstrap";
 import { AlertsComponent } from "./alerts/alerts.component";
 import { AlertMessageService } from "./alerts/alertmsg.service";
@@ -52,6 +53,7 @@ import * as fromApp from './store/app.reducer';
         AppRoutingModule,
         NgbDropdownModule,
         NgbModule,
+        NgbNavModule,
         NgbCollapseModule,
         NgbCarouselModule,
         StoreModule.forRoot(fromApp.appReducer),

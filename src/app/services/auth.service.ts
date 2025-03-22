@@ -69,10 +69,15 @@ export class AuthService implements OnDestroy {
       if(res.loggedInUserDetails){
         const userData = res.loggedInUserDetails;
         if (userData.idToken) {
-          const expirationDuration =
-            new Date(userData.expiresIn).getTime() -
-            new Date().getTime();
-          this.autoLogout(expirationDuration);
+          const storedExpirationDuration = localStorage.getItem('tokenExpirationDuration');
+          if (storedExpirationDuration) {
+            this.autoLogout(parseInt(storedExpirationDuration));
+          } else {
+            const expirationDuration =
+              new Date(userData.expiresIn).getTime() - new Date().getTime();
+            localStorage.setItem('tokenExpirationDuration', expirationDuration.toString());
+            this.autoLogout(expirationDuration);
+          }
         }
       } else {
         return;
@@ -84,6 +89,7 @@ export class AuthService implements OnDestroy {
     localStorage.removeItem("authdata");
     localStorage.removeItem("authdata");
     localStorage.removeItem("prodList");
+    localStorage.removeItem("tokenExpirationDuration");
     this.modal.dismissAll();
     this.router.navigate(["auth"]);
     

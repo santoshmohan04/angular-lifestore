@@ -21,6 +21,7 @@ import { selectCommonStatus } from "../store/common.selectors";
     standalone: false
 })
 export class ProductsComponent implements OnInit, AfterViewInit, OnDestroy {
+  active = 'cameras';
   displayTemplate = signal<TemplateRef<string>>(null);
   prodlist: Products;
   destroy$: Subject<boolean> = new Subject<boolean>();
