@@ -55,10 +55,15 @@ export class ProductsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   addtoCart(data: any) {
-    const add_payload = {
-      ...data, qty: 1,
-      totalamt: data.price,
+    if (!data.id) {
+      this.alertMsg.alertDanger('Product ID is missing. Cannot add to cart.');
+      return;
     }
+    
+    const add_payload = {
+      productId: data.id,
+      quantity: 1
+    };
     this.store.dispatch(commonactions.ProductsPageActions.addProductToCart({ payload: add_payload }));
   }
 

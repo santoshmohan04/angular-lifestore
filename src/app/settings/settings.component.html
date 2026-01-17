@@ -55,11 +55,11 @@
       <ng-container ngbNavItem="orders">
         <button ngbNavLink>Orders</button>
         <ng-template ngbNavContent>
-            <div ngbAccordion [closeOthers]="true" *ngIf="itemDates" style="width: 600px;">
-              @for (item of itemDates; track item; let i = $index) {
+            <div ngbAccordion [closeOthers]="true" *ngIf="userOrds.length > 0" style="width: 600px;">
+              @for (order of userOrds; track order.id; let i = $index) {
                 <div ngbAccordionItem>
                   <h2 ngbAccordionHeader>
-                    <button ngbAccordionButton>Ordered Data & Time: {{ item }}</button>
+                    <button ngbAccordionButton>Order Date: {{ order.date | date:'medium' }} - Total: Rs.{{ order.total | number }}</button>
                   </h2>
                   <div ngbAccordionCollapse>
                     <div ngbAccordionBody>
@@ -70,25 +70,27 @@
                       >
                         <thead class="table-dark">
                           <tr>
-                            <th>Item Id</th>
+                            <th>Product ID</th>
                             <th>Image</th>
                             <th>Item Name</th>
+                            <th>Quantity</th>
                             <th>Price</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr *ngFor="let x of userItems[i]">
-                            <td>{{ x.id }}</td>
+                          <tr *ngFor="let item of order.items">
+                            <td>{{ item.productId }}</td>
                             <td>
                               <img
-                                src="assets/{{ x.image }}"
-                                alt="{{ x.name }}"
+                                src="assets/{{ item.image }}"
+                                alt="{{ item.name }}"
                                 class="card-img-top"
                                 height="60px"
                               />
                             </td>
-                            <td>{{ x.name }}</td>
-                            <td>Rs.{{ x.price }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>Rs.{{ item.price | number }}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -97,6 +99,9 @@
                   </div>
                 </div>
               }
+            </div>
+            <div *ngIf="userOrds.length === 0" class="alert alert-info">
+              <p>No orders found.</p>
             </div>
         </ng-template>
       </ng-container>
@@ -122,9 +127,6 @@
               </p>
               <p>
                 Email: <strong>{{ userdetails.email }}</strong>
-              </p>
-              <p>
-                Email Verified: <strong>{{ userdetails.registered }}</strong>
               </p>
             </div>
           </div>

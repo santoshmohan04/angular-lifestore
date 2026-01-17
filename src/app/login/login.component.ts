@@ -47,6 +47,8 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       userPswd: [null, Validators.required],
     });
     this.signupForm = this.fb.group({
+      firstName: [null, Validators.required],
+      lastName: [null, Validators.required],
       sigupEmail: [
         null,
         [
@@ -107,8 +109,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     this.displayTemplate.set(this.loadingtemp);
     const loginpayload = {
       email: email,
-      password: password,
-      returnSecureToken: true,
+      password: password
     };
 
     this.store.dispatch(commonactions.AuthPageActions.loginUser({payload: loginpayload}));
@@ -119,6 +120,8 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!form.valid) {
       return;
     }
+    const firstName = form.value.firstName;
+    const lastName = form.value.lastName;
     const email = form.value.sigupEmail;
     const password = form.value.signupPswd;
 
@@ -126,7 +129,8 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     const signuppayload = {
       email: email,
       password: password,
-      returnSecureToken: true,
+      firstName: firstName,
+      lastName: lastName
     };
     this.store.dispatch(commonactions.AuthPageActions.signupUser({payload: signuppayload}));
     form.reset();

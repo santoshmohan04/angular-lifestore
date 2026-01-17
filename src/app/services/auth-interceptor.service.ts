@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpErrorResponse } from '@angular/common/http';
 import { take, exhaustMap, tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import * as commonactions from "src/app/store/common.actions";
@@ -17,15 +17,20 @@ export class AuthInterceptorService implements HttpInterceptor {
         if (!user.loggedInUserDetails) {
           return next.handle(req);
         }
+        
+        // Add Bearer token to Authorization header
         const modifiedReq = req.clone({
-          params: new HttpParams().set('auth', user.loggedInUserDetails.idToken),
+          setHeaders: {
+            Authorization: `Bearer ${user.loggedInUserDetails.idToken}`
+          }
         });
+        
         return next.handle(modifiedReq).pipe(
           tap({
             next: () => {},
             error: (err: HttpErrorResponse) => {
               console.log(err);
-              if (err.status === 401 && err.statusText === 'Unauthorized') {
+              if (err.status === 401) {
                 this.store.dispatch(commonactions.AuthPageActions.logoutUser());
                 this.alertmsg.alertDanger('Session Expired kindly login');
               }

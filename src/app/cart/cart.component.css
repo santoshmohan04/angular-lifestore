@@ -10,6 +10,7 @@
 .divTable {
   display: table;
   width: 100%;
+  border-collapse: collapse;
 }
 .rowTable {
   display: table-row;
@@ -21,7 +22,9 @@
 .divTableHead {
   border-bottom: 1px solid #eee;
   display: table-cell;
-  padding: 3px 10px;
+  padding: 10px;
+  vertical-align: middle;
+  text-align: center;
 }
 .divTableHeading {
   background-color: #eee;
@@ -35,4 +38,22 @@
 }
 .divTableBody {
   display: table-row-group;
+}
+
+.divTableCol:first-child {
+  text-align: left;
+}
+
+.media {
+  align-items: center;
+}
+
+.media-body {
+  flex: 1;
+  margin-left: 10px;
+}
+
+.media-heading {
+  margin: 0;
+  font-size: 1.1rem;
 }

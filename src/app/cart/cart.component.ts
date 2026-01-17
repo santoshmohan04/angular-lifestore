@@ -56,7 +56,8 @@ export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
         console.log(res);
         if (res.cartList && res.cartList !== "No Items") {
           this.cartKeys = Object.keys(res.cartList);
-          this.cartValues = Object.values(res.cartList);
+          // Clone the cart values to make them mutable for local quantity changes
+          this.cartValues = Object.values(res.cartList).map((item: any) => ({...item}));
   
           if (this.cartValues.length > 0) {
             this.updateGrandTotal();
@@ -94,20 +95,32 @@ export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
   }  
 
   rmCart(x: any) {
-    const index = this.cartValues.indexOf(x);
-    this.cartValues.splice(index, 1);
-    let cartid = this.cartKeys.at(index);
+    // Don't modify local state - let the effect and reducer handle it
     this.store.dispatch(
-      commonactions.CartPageActions.removeProductFromCart({ id: cartid })
+      commonactions.CartPageActions.removeProductFromCart({ id: x.id })
     );
-    this.updateGrandTotal();
   }
 
   conformOrd() {
-    let ordData = {
-      items: this.cartValues,
-      orddate: this.datepipe.transform(this.ordDate, "medium"),
+    // Transform cart items to only include required fields
+    const orderItems = this.cartValues.map(item => ({
+      productId: item.productId,
+      quantity: item.quantity || item.qty,
+      price: item.price,
+      name: item.name,
+      image: item.image
+    }));
+
+    // Calculate total as a number
+    const totalAmount = this.cartValues.reduce((sum, item) => {
+      return sum + parseFloat(item.totalamt || 0);
+    }, 0);
+
+    const ordData = {
+      items: orderItems,
+      total: totalAmount
     };
+
     this.store.dispatch(
       commonactions.UserActions.conformUserOrders({ payload: ordData })
     );
@@ -118,17 +131,25 @@ export class CartComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateTotal(item: any) {
-    item.totalamt = parseFloat(item.price) * item.qty;
+    // Ensure quantity is a valid number
+    item.qty = parseInt(item.qty) || 1;
+    if (item.qty < 1) item.qty = 1;
+    
+    // Recalculate the total for this item
+    const itemTotal = parseFloat(item.price) * item.qty;
+    item.totalamt = itemTotal.toFixed(2);
+    
+    // Update the grand total
     this.updateGrandTotal();
   }
 
   updateGrandTotal() {
     let sumtotal: number = 0;
     this.cartValues.forEach((t: any) => {
-      sumtotal = sumtotal + parseFloat(t.totalamt)
+      sumtotal = sumtotal + parseFloat(t.totalamt || 0);
     });
 
-    this.total.update((val) => sumtotal);
+    this.total.update(() => sumtotal);
   }
 
   ngOnDestroy(): void {

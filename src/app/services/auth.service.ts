@@ -2,7 +2,7 @@ import { Injectable, OnDestroy } from "@angular/core";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { catchError, map } from "rxjs/operators";
-import { throwError,Subject, takeUntil } from "rxjs";
+import { throwError, Subject, takeUntil } from "rxjs";
 import { Store } from '@ngrx/store';
 import { environment } from "src/environments/environment";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
@@ -10,22 +10,17 @@ import { AuthUserState } from "../store/common.reducers";
 import { selectAuthStatus } from "../store/common.selectors";
 
 export interface AuthResponseData {
-  kind: string;
   idToken: string;
   email: string;
   displayName: string;
-  refreshToken: string;
   expiresIn: string;
   localId: string;
-  profilePicture?: string;
-  registered?: boolean;
 }
 
 @Injectable({ providedIn: "root" })
 export class AuthService implements OnDestroy {
   private tokenExpirationTimer: any;
-  auth_url = environment.firebase_auth;
-  apiKey = environment.firebase_key;
+  private apiUrl = environment.apiUrl;
   destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
@@ -40,26 +35,43 @@ export class AuthService implements OnDestroy {
   }
 
   signup(payload: any) {
-    const url = this.auth_url + "accounts:signUp?key=" + this.apiKey;
-    return this.http.post<AuthResponseData>(url, payload).pipe(
-      map(this.handleHttpSuccess),
+    const url = `${this.apiUrl}/auth/register`;
+    return this.http.post<any>(url, payload).pipe(
+      map((response) => {
+        // Transform response to match existing interface
+        return {
+          idToken: response.access_token,
+          email: response.user.email,
+          displayName: `${response.user.firstName} ${response.user.lastName}`,
+          expiresIn: (Date.now() + 3600000).toString(), // 1 hour from now
+          localId: response.user.id
+        };
+      }),
       catchError(this.handleError)
     );
   }
 
   login(payload: any) {
-    const url =
-      this.auth_url + "accounts:signInWithPassword?key=" + this.apiKey;
-    return this.http.post<AuthResponseData>(url, payload).pipe(
-      map(this.handleHttpSuccess),
+    const url = `${this.apiUrl}/auth/login`;
+    return this.http.post<any>(url, payload).pipe(
+      map((response) => {
+        // Transform response to match existing interface
+        return {
+          idToken: response.access_token,
+          email: response.user.email,
+          displayName: `${response.user.firstName} ${response.user.lastName}`,
+          expiresIn: (Date.now() + 3600000).toString(), // 1 hour from now
+          localId: response.user.id
+        };
+      }),
       catchError(this.handleError)
     );
   }
 
   chngpswd(payload: any) {
-    const url = this.auth_url + "accounts:update?key=" + this.apiKey;
-    return this.http.post<AuthResponseData>(url, payload).pipe(
-      map(this.handleHttpSuccess),
+    const url = `${this.apiUrl}/auth/change-password`;
+    return this.http.post<any>(url, { password: payload.password }).pipe(
+      map((response) => response),
       catchError(this.handleError)
     );
   }
@@ -107,20 +119,21 @@ export class AuthService implements OnDestroy {
 
   handleError(errorRes: HttpErrorResponse) {
     let errorMessage = "An unknown error occurred!";
-    if (!errorRes.error || !errorRes.error.error) {
-      return throwError(() => new Error(errorMessage));
+    
+    if (errorRes.error && errorRes.error.message) {
+      if (Array.isArray(errorRes.error.message)) {
+        errorMessage = errorRes.error.message.join(', ');
+      } else {
+        errorMessage = errorRes.error.message;
+      }
+    } else if (errorRes.status === 401) {
+      errorMessage = "Invalid credentials";
+    } else if (errorRes.status === 409) {
+      errorMessage = "This email exists already";
+    } else if (errorRes.status === 404) {
+      errorMessage = "Resource not found";
     }
-    switch (errorRes.error.error.message) {
-      case "EMAIL_EXISTS":
-        errorMessage = "This email exists already";
-        break;
-      case "EMAIL_NOT_FOUND":
-        errorMessage = "This email does not exist.";
-        break;
-      case "INVALID_PASSWORD":
-        errorMessage = "This password is not correct.";
-        break;
-    }
+    
     return throwError(() => new Error(errorMessage));
   }
 

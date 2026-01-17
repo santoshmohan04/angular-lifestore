@@ -18,8 +18,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
   isLoading = false;
   error: string = null;
   userOrds: any = [];
-  userItems: any = [];
-  itemDates: any = [];
   userdetails: AuthResponseData;
   destroy$: Subject<boolean> = new Subject<boolean>();
 
@@ -50,11 +48,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.store.select(selectCommonStatus).pipe(takeUntil(this.destroy$)).subscribe((res) => {
       if(res.userorders){
         this.isLoading = false;
-        this.userOrds = Object.values(res.userorders);
-        this.userOrds.forEach((element) => {
-          this.userItems.push(element.items);
-          this.itemDates.push(element.orddate);
-        });
+        // Handle both array response (new format) and object response (old format)
+        this.userOrds = Array.isArray(res.userorders) 
+          ? res.userorders 
+          : Object.values(res.userorders);
       } else if(res.error){
         this.isLoading = false;
         this.alertMsg.alertDanger(res.error);
@@ -71,9 +68,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     if (newPswd == confPswd) {
       this.isLoading = true;
       const pswdpayload = {
-        idToken: this.userdetails.idToken,
-        password: confPswd,
-        returnSecureToken: true,
+        password: confPswd
       };
 
       this.store.dispatch(commonactions.AuthPageActions.changeUserPassword({payload : pswdpayload}));

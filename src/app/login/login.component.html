@@ -91,28 +91,50 @@
       </header>
       <main class="signup-body">
         <form
-        [formGroup]="authForm"
-        (ngSubmit)="onlogin(authForm)"
+        [formGroup]="signupForm"
+        (ngSubmit)="onSignup(signupForm)"
       >
         <div class="mb-3 mt-3">
-          <label for="email">Email:</label>
+          <label for="firstName">First Name:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="firstName"
+            formControlName="firstName"
+            placeholder="Enter first name"
+            name="firstName"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="lastName">Last Name:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="lastName"
+            formControlName="lastName"
+            placeholder="Enter last name"
+            name="lastName"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="signupEmail">Email:</label>
           <input
             type="email"
             class="form-control"
-            id="email"
-            formControlName="userEmail"
+            id="signupEmail"
+            formControlName="sigupEmail"
             placeholder="Enter email"
             name="email"
           />
         </div>
         <div class="mb-3">
-          <label for="pwd">Password:</label>
+          <label for="signupPwd">Password:</label>
           <div class="input-group">
             <input
               [type]="showPassword ? 'text' : 'password'"
               class="form-control"
-              id="pwd"
-              formControlName="userPswd"
+              id="signupPwd"
+              formControlName="signupPswd"
               placeholder="Enter password"
               name="pswd"
             />
@@ -131,22 +153,10 @@
             </a>
           </div>
         </div>
-        <div class="form-check mb-3">
-          <label class="form-check-label">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="remember"
-              [(ngModel)]="isChecked"
-              [ngModelOptions]="{ standalone: true }"
-            />
-            Remember me
-          </label>
-        </div>
         <button
           type="submit"
           class="btn btn-primary mb-3"
-          [disabled]="authForm.invalid"
+          [disabled]="signupForm.invalid"
         >
           Submit
         </button>
