@@ -1,0 +1,158 @@
+<div class="cart-container">
+  <!-- Loading State -->
+  @if(store.loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="60"></mat-spinner>
+      <p>Loading your cart...</p>
+    </div>
+  }
+
+  <!-- Empty Cart State -->
+  @if(!store.loading() && store.isEmpty()) {
+    <div class="empty-cart">
+      <mat-icon class="empty-icon">shopping_cart</mat-icon>
+      <h2>Your cart is empty</h2>
+      <p>Add some items to get started!</p>
+      <button mat-raised-button color="primary" routerLink="/products">
+        <mat-icon>store</mat-icon>
+        Continue Shopping
+      </button>
+    </div>
+  }
+
+  <!-- Cart with Items -->
+  @if(!store.loading() && store.hasItems()) {
+    <div class="cart-content">
+      <!-- Cart Items Section -->
+      <div class="cart-items-section">
+        <div class="section-header">
+          <h1>Shopping Cart</h1>
+          <mat-icon [matBadge]="store.totalItems()" matBadgeColor="accent" matBadgeSize="medium">
+            shopping_cart
+          </mat-icon>
+        </div>
+
+        <mat-card class="items-card">
+          @for(item of store.items(); track item.id) {
+            <div class="cart-item">
+              <div class="item-image">
+                <img [src]="'assets/' + item.image" [alt]="item.name" />
+              </div>
+
+              <div class="item-details">
+                <h3 class="item-name">{{ item.name }}</h3>
+                <p class="item-price">₹{{ item.price | number:'1.2-2' }} each</p>
+              </div>
+
+              <div class="item-quantity">
+                <label>Quantity</label>
+                <div class="quantity-controls">
+                  <button 
+                    mat-icon-button 
+                    (click)="decrementQuantity(item)"
+                    [disabled]="item.qty <= 1"
+                    color="primary">
+                    <mat-icon>remove</mat-icon>
+                  </button>
+                  <span class="quantity-value">{{ item.qty }}</span>
+                  <button 
+                    mat-icon-button 
+                    (click)="incrementQuantity(item)"
+                    color="primary">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div class="item-total">
+                <label>Total</label>
+                <p class="total-price">₹{{ getItemTotal(item) | number:'1.2-2' }}</p>
+              </div>
+
+              <div class="item-actions">
+                <button 
+                  mat-icon-button 
+                  color="warn" 
+                  (click)="removeItem(item)"
+                  matTooltip="Remove from cart">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            @if(!$last) {
+              <mat-divider></mat-divider>
+            }
+          }
+        </mat-card>
+
+        <div class="cart-actions">
+          <button 
+            mat-stroked-button 
+            color="warn" 
+            (click)="clearCart()"
+            [disabled]="store.isEmpty()">
+            <mat-icon>delete_sweep</mat-icon>
+            Clear Cart
+          </button>
+          <button 
+            mat-raised-button 
+            routerLink="/products">
+            <mat-icon>arrow_back</mat-icon>
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+
+      <!-- Order Summary Section (Sticky) -->
+      <div class="order-summary-section">
+        <mat-card class="summary-card">
+          <mat-card-header>
+            <mat-card-title>Order Summary</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="summary-row">
+              <span>Subtotal ({{ store.totalItems() }} items)</span>
+              <span>₹{{ store.subtotal() | number:'1.2-2' }}</span>
+            </div>
+
+            <div class="summary-row">
+              <span>Tax (18%)</span>
+              <span>₹{{ store.tax() | number:'1.2-2' }}</span>
+            </div>
+
+            <div class="summary-row">
+              <span>Shipping</span>
+              <span>₹{{ store.shipping() | number:'1.2-2' }}</span>
+            </div>
+
+            <mat-divider class="summary-divider"></mat-divider>
+
+            <div class="summary-row total-row">
+              <span>Total</span>
+              <span class="total-amount">₹{{ store.grandTotal() | number:'1.2-2' }}</span>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button 
+              mat-raised-button 
+              color="accent" 
+              class="checkout-btn"
+              (click)="checkout()"
+              [disabled]="store.isEmpty()">
+              <mat-icon>payment</mat-icon>
+              Proceed to Checkout
+            </button>
+          </mat-card-actions>
+
+          <div class="security-note">
+            <mat-icon>lock</mat-icon>
+            <span>Secure checkout</span>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

@@ -1,36 +1,69 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, signal } from "@angular/core";
+import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, signal, effect, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { ReactiveFormsModule } from "@angular/forms";
+import { RouterModule } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
-import { Subject, takeUntil } from "rxjs";
-import { Store } from '@ngrx/store';
-import { AlertMessageService } from "../alerts/alertmsg.service";
-import * as commonactions from "src/app/store/common.actions"
-import { selectAuthStatus } from "../store/common.selectors";
+import { MatIconModule } from "@angular/material/icon";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatButtonModule } from "@angular/material/button";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { SnackbarService } from "../services/snackbar.service";
+import { AuthStore } from "../store/auth.store";
 
 @Component({
     selector: "app-login",
     templateUrl: "./login.component.html",
-    styleUrls: ["./login.component.css"],
-    standalone: false
+    styleUrls: ["./login.component.scss"],
+    standalone: true,
+    imports: [
+      CommonModule, 
+      ReactiveFormsModule, 
+      RouterModule, 
+      MatIconModule,
+      MatFormFieldModule,
+      MatInputModule,
+      MatButtonModule,
+      MatCheckboxModule,
+      MatProgressSpinnerModule
+    ]
 })
 export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly snackbar = inject(SnackbarService);
+  readonly authStore = inject(AuthStore);
+
   authForm: FormGroup;
   signupForm: FormGroup;
-  isChecked = false;
-  showPassword: boolean;
+  showPassword = signal<boolean>(false);
   displayTemplate = signal<TemplateRef<string>>(null);
-  destroy$: Subject<boolean> = new Subject<boolean>();
 
   @ViewChild('logintemp') private readonly logintemp: TemplateRef<string>;
   @ViewChild('signuptemp') private readonly signuptemp: TemplateRef<string>;
   @ViewChild('loadingtemp') private readonly loadingtemp: TemplateRef<string>;
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly router: Router,
-    private readonly alertMsg: AlertMessageService,
-    private readonly store: Store
-  ) {}
+  constructor() {
+    // Effect to handle auth errors
+    effect(() => {
+      const error = this.authStore.error();
+      if (error) {
+        if (this.router.url.includes('signup')) {
+          this.displayTemplate.set(this.signuptemp);
+        } else {
+          this.displayTemplate.set(this.logintemp);
+        }
+        this.snackbar.showError(error);
+      }
+      
+      // Handle loading state
+      if (this.authStore.loading()) {
+        this.displayTemplate.set(this.loadingtemp);
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.authForm = this.fb.group({
@@ -45,6 +78,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
         ],
       ],
       userPswd: [null, Validators.required],
+      rememberMe: [false]
     });
     this.signupForm = this.fb.group({
       firstName: [null, Validators.required],
@@ -67,20 +101,9 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       this.authForm.patchValue({
         userEmail: usrCrd.user_email,
         userPswd: usrCrd.user_pswd,
+        rememberMe: true
       });
-      this.isChecked = true;
     }
-
-    this.store.select(selectAuthStatus).pipe(takeUntil(this.destroy$)).subscribe((res) => {
-      if(res.error){
-        if(this.router.url.includes('signup')){
-          this.displayTemplate.set(this.signuptemp);
-        } else {
-          this.displayTemplate.set(this.logintemp);
-        }
-        this.alertMsg.alertDanger(res.error);
-      }
-    })
   }
 
   ngAfterViewInit(): void {
@@ -97,7 +120,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     const email = form.value.userEmail;
     const password = form.value.userPswd;
-    const remchecked = this.isChecked;
+    const remchecked = form.value.rememberMe;
     if (remchecked) {
       let payload = {
         user_email: email,
@@ -112,7 +135,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       password: password
     };
 
-    this.store.dispatch(commonactions.AuthPageActions.loginUser({payload: loginpayload}));
+    this.authStore.login(loginpayload);
     form.reset();
   }
 
@@ -132,12 +155,11 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       firstName: firstName,
       lastName: lastName
     };
-    this.store.dispatch(commonactions.AuthPageActions.signupUser({payload: signuppayload}));
+    this.authStore.signup(signuppayload);
     form.reset();
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next(true);
-    this.destroy$.unsubscribe();
+    // Cleanup if needed
   }
 }

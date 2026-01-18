@@ -1,34 +1,32 @@
 <!-- Footer -->
-<footer class="text-center text-lg-start bg-dark text-muted">
+<footer class="footer-container">
     <!-- Section: Social media -->
-    <section
-      class="d-flex justify-content-center justify-content-lg-between p-4 border-bottom"
-    >
+    <section class="social-section">
       <!-- Left -->
-      <div class="me-5 d-none d-lg-block">
+      <div class="social-text">
         <span>Get connected with us on social networks:</span>
       </div>
       <!-- Left -->
   
       <!-- Right -->
-      <div>
-        <a href="" class="me-4 text-reset">
-          <i class="fab fa-facebook-f"></i>
+      <div class="social-icons">
+        <a href="" class="social-link">
+          <mat-icon>facebook</mat-icon>
         </a>
-        <a href="" class="me-4 text-reset">
-          <i class="fab fa-twitter"></i>
+        <a href="" class="social-link">
+          <mat-icon svgIcon="twitter"></mat-icon>
         </a>
-        <a href="" class="me-4 text-reset">
-          <i class="fab fa-google"></i>
+        <a href="" class="social-link">
+          <mat-icon>email</mat-icon>
         </a>
-        <a href="" class="me-4 text-reset">
-          <i class="fab fa-instagram"></i>
+        <a href="" class="social-link">
+          <mat-icon>photo_camera</mat-icon>
         </a>
-        <a href="" class="me-4 text-reset">
-          <i class="fab fa-linkedin"></i>
+        <a href="" class="social-link">
+          <mat-icon>business</mat-icon>
         </a>
-        <a href="" class="me-4 text-reset">
-          <i class="fab fa-github"></i>
+        <a href="" class="social-link">
+          <mat-icon>code</mat-icon>
         </a>
       </div>
       <!-- Right -->
@@ -36,15 +34,15 @@
     <!-- Section: Social media -->
   
     <!-- Section: Links  -->
-    <section class="">
-      <div class="container text-center text-md-start mt-5">
+    <section class="links-section">
+      <div class="footer-content">
         <!-- Grid row -->
-        <div class="row mt-3">
+        <div class="footer-row">
           <!-- Grid column -->
-          <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+          <div class="footer-col about-col">
             <!-- Content -->
-            <h6 class="text-uppercase fw-bold mb-4">
-              <i class="fas fa-gem me-3"></i>Lifestyle Store
+            <h6 class="footer-heading">
+              <mat-icon class="heading-icon">diamond</mat-icon>Lifestyle Store
             </h6>
             <p>
               Here you can use rows and columns to organize your footer content. Lorem ipsum
@@ -54,60 +52,68 @@
           <!-- Grid column -->
   
           <!-- Grid column -->
-          <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4" id="prodlist">
+          <div class="footer-col products-col" id="prodlist">
             <!-- Links -->
-            <h6 class="text-uppercase fw-bold mb-4">
+            <h6 class="footer-heading">
               Products
             </h6>
             <p>
-              <a routerLink="/products" class="text-reset"><i class="fas fa-camera"></i> Cameras</a>
+              <a routerLink="/products" class="footer-link">
+                <mat-icon class="link-icon">photo_camera</mat-icon> Cameras
+              </a>
             </p>
             <p>
-              <a routerLink="/products" class="text-reset"><i class="fas fa-clock"></i> Watches</a>
+              <a routerLink="/products" class="footer-link">
+                <mat-icon class="link-icon">watch</mat-icon> Watches
+              </a>
             </p>
             <p>
-              <a routerLink="/products" class="text-reset"><i class="fas fa-tshirt"></i> Shirts</a>
+              <a routerLink="/products" class="footer-link">
+                <mat-icon class="link-icon">checkroom</mat-icon> Shirts
+              </a>
             </p>
             <p>
-              <a routerLink="/products" class="text-reset"><i class="fas fa-mobile"></i> Smartphones</a>
+              <a routerLink="/products" class="footer-link">
+                <mat-icon class="link-icon">smartphone</mat-icon> Smartphones
+              </a>
             </p>
           </div>
           <!-- Grid column -->
   
           <!-- Grid column -->
-          <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4" id="prodlist">
+          <div class="footer-col links-col" id="prodlist">
             <!-- Links -->
-            <h6 class="text-uppercase fw-bold mb-4">
+            <h6 class="footer-heading">
               Useful links
             </h6>
             <p>
-              <a routerLink="/contact" class="text-reset">Pricing</a>
+              <a routerLink="/contact" class="footer-link">Pricing</a>
             </p>
             <p>
-              <a routerLink="/settings" class="text-reset">Settings</a>
+              <a routerLink="/settings" class="footer-link">Settings</a>
             </p>
             <p>
-              <a routerLink="/settings" class="text-reset">Orders</a>
+              <a routerLink="/settings" class="footer-link">Orders</a>
             </p>
             <p>
-              <a routerLink="/contact" class="text-reset">Help</a>
+              <a routerLink="/contact" class="footer-link">Help</a>
             </p>
           </div>
           <!-- Grid column -->
   
           <!-- Grid column -->
-          <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+          <div class="footer-col contact-col">
             <!-- Links -->
-            <h6 class="text-uppercase fw-bold mb-4">
+            <h6 class="footer-heading">
               Contact
             </h6>
-            <p><i class="fas fa-home me-3"></i> New York, NY 10012, US</p>
+            <p><mat-icon class="link-icon">home</mat-icon> New York, NY 10012, US</p>
             <p>
-              <i class="fas fa-envelope me-3"></i>
+              <mat-icon class="link-icon">email</mat-icon>
               info&#64;example.com
             </p>
-            <p><i class="fas fa-phone me-3"></i> + 01 234 567 88</p>
-            <p><i class="fas fa-print me-3"></i> + 01 234 567 89</p>
+            <p><mat-icon class="link-icon">phone</mat-icon> + 01 234 567 88</p>
+            <p><mat-icon class="link-icon">print</mat-icon> + 01 234 567 89</p>
           </div>
           <!-- Grid column -->
         </div>
@@ -117,7 +123,7 @@
     <!-- Section: Links  -->
   
     <!-- Copyright -->
-    <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05);">
+    <div class="copyright">
       © 2021 Copyright:
       Lifestyle Store. All Rights Reserved  |  Contact Us: +91 90000 00000
     </div>

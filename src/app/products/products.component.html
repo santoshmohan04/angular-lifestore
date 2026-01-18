@@ -1,138 +1,114 @@
-<ng-container [ngTemplateOutlet]="displayTemplate()"></ng-container>
+<div class="products-container">
+  <mat-sidenav-container class="sidenav-container">
+    <!-- Sidenav for Categories -->
+    <mat-sidenav 
+      #sidenav 
+      [mode]="isMobile() ? 'over' : 'side'" 
+      [opened]="!isMobile()"
+      class="category-sidenav">
+      <div class="sidenav-header">
+        <h2>Categories</h2>
+      </div>
+      
+      <mat-nav-list>
+        @for(category of categories; track category.key) {
+          <mat-list-item 
+            (click)="selectCategory(category.key); isMobile() && sidenav.close()"
+            [activated]="selectedCategory() === category.key"
+            class="category-item">
+            <mat-icon matListItemIcon>{{ category.icon }}</mat-icon>
+            <span matListItemTitle>{{ category.name }}</span>
+          </mat-list-item>
+        }
+      </mat-nav-list>
+    </mat-sidenav>
 
-<ng-template #spinner>
-  <div class="loader">
-    <app-loading-spinner></app-loading-spinner>
-  </div>
-</ng-template>
+    <!-- Main Content -->
+    <mat-sidenav-content>
+      <!-- Toolbar -->
+      <div class="products-toolbar">
+        <div class="toolbar-left">
+          @if(isMobile()) {
+            <button mat-icon-button (click)="sidenav.toggle()">
+              <mat-icon>menu</mat-icon>
+            </button>
+          }
+          <h1 class="products-title">
+            @for(category of categories; track category.key) {
+              @if(selectedCategory() === category.key) {
+                {{ category.name }}
+              }
+            }
+          </h1>
+          <mat-chip-set>
+            <mat-chip>{{ displayedProducts().length }} products</mat-chip>
+          </mat-chip-set>
+        </div>
+        
+        <div class="toolbar-right">
+          <mat-form-field appearance="outline" class="sort-select">
+            <mat-label>Sort by</mat-label>
+            <mat-select 
+              [value]="sortOption()" 
+              (selectionChange)="updateSort($event.value)">
+              @for(option of sortOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
 
-<ng-template #productstemp>
-  <div class="container" id="content">
-  <div class="d-flex">
-    <div ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills flex-column" orientation="vertical">
-      <ng-container ngbNavItem="cameras">
-        <button ngbNavLink><i class="fas fa-camera"></i> Cameras</button>
-        <ng-template ngbNavContent>
-          <div class="row text-center" id="cameras">
-            @for(x of prodlist.cameras; let i =$index; track x.id){
-            <div class="col-sm-3">
-              <div class="card mb-3">
-                <img
-                  src="assets/{{ x.image }}"
-                  alt="{{ x.name }}"
-                  class="card-img-top"
-                  height="150px"
+      <!-- Loading State -->
+      @if(isLoading()) {
+        <div class="loading-container">
+          <mat-spinner diameter="60"></mat-spinner>
+          <p>Loading products...</p>
+        </div>
+      }
+
+      <!-- Products Grid -->
+      @if(!isLoading() && displayedProducts().length > 0) {
+        <div class="products-grid">
+          @for(product of displayedProducts(); track product.id) {
+            <mat-card class="product-card">
+              <div class="product-image-container">
+                <img 
+                  mat-card-image 
+                  [src]="'assets/' + product.image" 
+                  [alt]="product.name"
+                  class="product-image"
                 />
-                <div class="card-body text-center">
-                  <h3 class="card-title">{{ x.name }}</h3>
-                  <p class="card-text">Rs.{{ x.price }}</p>
-                  <button
-                    type="button"
-                    class="btn btn-block btn-primary"
-                    (click)="addtoCart(x)"
-                  >
-                    Add to cart
-                  </button>
-                </div>
               </div>
-            </div>
-            }
-          </div>
-        </ng-template>
-      </ng-container>
-      <ng-container ngbNavItem="watches">
-        <button ngbNavLink><i class="fas fa-clock"></i> Watches</button>
-        <ng-template ngbNavContent>
-          <div class="row text-center" id="watches">
-            @for(p of prodlist.watches; let i =$index; track p.id){
-            <div class="col-sm-3">
-              <div class="card mb-3">
-                <img
-                  src="assets/{{ p.image }}"
-                  alt="{{ p.name }}"
-                  class="card-img-top"
-                  height="150px"
-                />
-                <div class="card-body text-center">
-                  <h3 class="card-title">{{ p.name }}</h3>
-                  <p class="card-text">Rs.{{ p.price }}</p>
-                  <button
-                    type="button"
-                    class="btn btn-block btn-primary"
-                    (click)="addtoCart(p)"
-                  >
-                    Add to cart
-                  </button>
-                </div>
-              </div>
-            </div>
-            }
-          </div>
-        </ng-template>
-      </ng-container>
-      <ng-container ngbNavItem="shirts">
-        <button ngbNavLink><i class="fas fa-tshirt"></i> Shirts</button>
-        <ng-template ngbNavContent>
-          <div class="row text-center" id="shirts">
-            @for(t of prodlist.shirts; let i =$index; track t.id){
-            <div class="col-sm-3">
-              <div class="card mb-3">
-                <img
-                  src="assets/{{ t.image }}"
-                  alt="{{ t.name }}"
-                  class="card-img-top"
-                  height="150px"
-                />
-                <div class="card-body text-center">
-                  <h3 class="card-title">{{ t.name }}</h3>
-                  <p class="card-text">Rs.{{ t.price }}</p>
-                  <button
-                    type="button"
-                    class="btn btn-block btn-primary"
-                    (click)="addtoCart(t)"
-                  >
-                    Add to cart
-                  </button>
-                </div>
-              </div>
-            </div>
-            }
-          </div>
-        </ng-template>
-      </ng-container>
-      <ng-container ngbNavItem="smartphones">
-        <button ngbNavLink><i class="fas fa-mobile"></i> Smartphones</button>
-        <ng-template ngbNavContent>
-          <div class="row text-center" id="smartphones">
-            @for(m of prodlist.smartphones; let i =$index; track m.id){
-            <div class="col-sm-3">
-              <div class="card mb-3">
-                <img
-                  src="assets/{{ m.image }}"
-                  alt="{{ m.name }}"
-                  class="card-img-top"
-                  height="200px"
-                />
-                <div class="card-body text-center">
-                  <h3 class="card-title">{{ m.name }}</h3>
-                  <p class="card-text">Rs.{{ m.price }}</p>
-                  <button
-                    type="button"
-                    class="btn btn-block btn-primary"
-                    (click)="addtoCart(m)"
-                  >
-                    Add to cart
-                  </button>
-                </div>
-              </div>
-            </div>
-            }
-          </div>
-        </ng-template>
-      </ng-container>
-    </div>
-  
-    <div [ngbNavOutlet]="nav" class="ms-4"></div>
-  </div>
+              
+              <mat-card-content class="product-content">
+                <h3 class="product-name">{{ product.name }}</h3>
+                <p class="product-price">₹{{ product.price }}</p>
+              </mat-card-content>
+              
+              <mat-card-actions class="product-actions">
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  (click)="addtoCart(product)"
+                  class="add-to-cart-btn">
+                  <mat-icon>shopping_cart</mat-icon>
+                  Add to Cart
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          }
+        </div>
+      }
+
+      <!-- Empty State -->
+      @if(!isLoading() && displayedProducts().length === 0) {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">inventory_2</mat-icon>
+          <h2>No products found</h2>
+          <p>Try selecting a different category</p>
+        </div>
+      }
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 </div>
-</ng-template>

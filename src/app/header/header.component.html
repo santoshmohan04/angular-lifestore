@@ -1,97 +1,73 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-  <div class="container-fluid">
-    <a [routerLink]="'.'" class="navbar-brand"
-      ><i class="bi bi-shop"></i> Lifestyle Store</a
-    >
-    <button
-      type="button"
-      class="navbar-toggler"
-      (click)="isCollapsed = !isCollapsed"
-      [attr.aria-expanded]="!isCollapsed"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div [(ngbCollapse)]="isCollapsed" class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto">
-        @if(userdetails){
-          <li class="nav-item">
-            <a [routerLink]="'/products'" class="nav-link"
-              ><i class="fab fa-product-hunt"></i> Products</a
-            >
-          </li>
+<mat-toolbar color="primary" class="header-toolbar">
+  <div class="toolbar-content">
+    <!-- App Title -->
+    <a routerLink="/" class="app-title">
+      <mat-icon>store</mat-icon>
+      <span>Lifestyle Store</span>
+    </a>
+
+    <span class="spacer"></span>
+
+    <!-- Navigation Links -->
+    <nav class="nav-links">
+      @if (isAuthenticated()) {
+        <a mat-button routerLink="/products" routerLinkActive="active-link">
+          <mat-icon>shopping_bag</mat-icon>
+          <span>Products</span>
+        </a>
         
+        <a mat-button routerLink="/cart" routerLinkActive="active-link">
+          <mat-icon>shopping_cart</mat-icon>
+          <span>Cart</span>
+        </a>
         
-        <li class="nav-item ngbDropdown" ngbDropdown>
-            <a
-            class="nav-link"
-            tabindex="0"
-            id="navbarDropdown3"
-            ngbDropdownToggle
-            role="button"
-          >
-            <i class="bi bi-person-circle"></i> {{ userdetails.email }}
-          </a>
-          
-          <div
-            ngbDropdownMenu
-            aria-labelledby="navbarDropdown3"
-            class="dropdown-menu"
-          >
-            <a ngbDropdownItem [routerLink]="'/cart'"
-              ><i class="bi bi-bag-check"></i> Cart
-            </a>
-            <a [routerLink]="'/settings'" ngbDropdownItem
-              ><i class="bi bi-gear"></i> Settings</a
-            >
-            <a ngbDropdownItem (click)="openVerticallyCentered(logout)"
-              ><i class="bi bi-box-arrow-in-right"></i> Logout</a
-            >
-          </div>
-        </li>
-      } @else {
-        <li class="nav-item" routerLinkActive="active">
-          <a [routerLink]="'/auth'" class="nav-link"
-            ><i class="bi bi-box-arrow-in-right"></i> Login</a
-          >
-        </li>
-       
+        <a mat-button routerLink="/orders" routerLinkActive="active-link">
+          <mat-icon>receipt_long</mat-icon>
+          <span>Orders</span>
+        </a>
       }
-      <li class="nav-item" routerLinkActive="active">
-        <a [routerLink]="'/contact'" class="nav-link"
-          ><i class="bi bi-question-circle"></i> Contact Us</a
-        >
-      </li>
-      </ul>
+      
+      <a mat-button routerLink="/contact" routerLinkActive="active-link">
+        <mat-icon>contact_support</mat-icon>
+        <span>Contact</span>
+      </a>
+    </nav>
+
+    <!-- Auth Section -->
+    <div class="auth-section">
+      @if (isAuthenticated()) {
+        <!-- Authenticated User Menu -->
+        <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-button">
+          <mat-icon>account_circle</mat-icon>
+          <span class="user-email">{{ userEmail() }}</span>
+          <mat-icon>arrow_drop_down</mat-icon>
+        </button>
+        
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <div class="user-menu-header" mat-menu-item disabled>
+            <mat-icon>person</mat-icon>
+            <span>{{ userEmail() }}</span>
+          </div>
+          
+          <mat-divider></mat-divider>
+          
+          <button mat-menu-item routerLink="/settings">
+            <mat-icon>settings</mat-icon>
+            <span>Settings</span>
+          </button>
+          
+          <button mat-menu-item (click)="onLogout()">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+          </button>
+        </mat-menu>
+      } @else {
+        <!-- Not Authenticated - Login/Signup -->
+        <button mat-raised-button color="accent" routerLink="/auth" class="login-button">
+          <mat-icon>login</mat-icon>
+          <span>Login / Sign Up</span>
+        </button>
+      }
     </div>
   </div>
-</nav>
-
-<!-- The Modal -->
-
-<ng-template #logout let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title">Log out</h4>
-    <button
-      type="button"
-      class="btn-close"
-      aria-label="Close"
-      (click)="modal.dismiss('Cross click')"
-    ></button>
-  </div>
-  <div class="modal-body">
-    <div class="mb-5 text-center">
-      <div class="delete-icon">
-        <i class="bi-trash"></i>
-      </div>
-      <h4 class="text-center">Are you sure you wish to Log out</h4>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-danger" (click)="modal.close()">
-      Cancel
-    </button>
-    <button type="button" class="btn btn-primary" (click)="onLogout()">
-      Confirm
-    </button>
-  </div>
-</ng-template>
+</mat-toolbar>

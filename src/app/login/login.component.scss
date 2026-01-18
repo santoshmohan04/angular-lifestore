@@ -1,0 +1,161 @@
+
+.outer-box {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to top left, #3ed8ff, #a8f5ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.inner-box {
+  width: 450px;
+  max-width: 90%;
+  padding: 40px;
+  background: linear-gradient(to top left, #ffffffff, #ffffff33);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(39, 115, 165, 0.3);
+  z-index: 2;
+  position: relative;
+}
+
+.signup-header {
+  text-align: center;
+  margin-bottom: 32px;
+
+  .auth-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--mat-sys-primary);
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    color: #212121;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: #555;
+    margin: 0;
+  }
+}
+
+.signup-body {
+  margin: 24px 0;
+
+  .full-width {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .remember-me {
+    margin: -8px 0 20px 0;
+
+    mat-checkbox {
+      ::ng-deep .mdc-label {
+        color: #424242;
+      }
+    }
+  }
+
+  .submit-btn {
+    height: 48px;
+    font-size: 16px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.signup-footer {
+  text-align: center;
+  margin-top: 24px;
+
+  p {
+    color: #555;
+    margin: 0;
+    font-size: 0.95rem;
+
+    a {
+      color: var(--mat-sys-primary);
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(to top right, #ffffff33, #ffffffff);
+  position: absolute;
+  opacity: 0.5;
+}
+
+.c1 {
+  top: 10%;
+  left: 20%;
+}
+
+.c2 {
+  bottom: 15%;
+  right: 25%;
+}
+
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to top left, #3ed8ff, #a8f5ff);
+}
+
+// Material form field customization
+::ng-deep {
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+
+    .mdc-text-field--outlined .mdc-notched-outline {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: rgba(0, 0, 0, 0.23);
+      }
+    }
+
+    &.mat-focused {
+      .mdc-text-field--outlined .mdc-notched-outline {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: var(--mat-sys-primary);
+        }
+      }
+    }
+  }
+}

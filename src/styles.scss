@@ -1,0 +1,122 @@
+// Angular Material Theme Configuration
+@use '@angular/material' as mat;
+
+// Import fonts
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Silkscreen&display=swap');
+
+html {
+  color-scheme: light dark;
+  @include mat.theme((
+    color: mat.$azure-palette,
+    typography: Roboto,
+    density: 0
+  ));
+}
+
+// ===========================
+// Global Styles
+// ===========================
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+}
+
+// Loader styles
+.loader {
+  position: fixed;
+  top: 40%;
+  right: 50%;
+}
+
+// Material Snackbar Styles
+.snackbar-success {
+  background-color: #4caf50 !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+.snackbar-error {
+  background-color: #f44336 !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+.snackbar-warning {
+  background-color: #ff9800 !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+.snackbar-info {
+  background-color: #2196f3 !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-shape: 8px;
+}
+
+// Smooth transitions for theme switching
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+// Custom scrollbar for dark theme
+.dark-theme {
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #424242;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #888;
+  }
+}

@@ -1,0 +1,158 @@
+@if (order(); as order) {
+  <div class="invoice-container">
+    <!-- Action buttons - hidden in print -->
+    <div class="action-buttons no-print">
+      <button mat-raised-button color="primary" (click)="downloadPDF()">
+        <mat-icon>picture_as_pdf</mat-icon>
+        Download PDF
+      </button>
+      <button mat-raised-button (click)="printInvoice()">
+        <mat-icon>print</mat-icon>
+        Print Invoice
+      </button>
+      <button mat-stroked-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Order
+      </button>
+    </div>
+
+    <!-- Invoice content -->
+    <div class="invoice-content">
+      <!-- Header -->
+      <div class="invoice-header">
+        <div class="company-info">
+          <h1 class="mat-headline-4">{{ companyInfo.name }}</h1>
+          <p class="mat-body-1">{{ companyInfo.address }}</p>
+          <p class="mat-body-1">{{ companyInfo.city }}</p>
+          <p class="mat-body-1">{{ companyInfo.phone }}</p>
+          <p class="mat-body-1">{{ companyInfo.email }}</p>
+        </div>
+        <div class="invoice-meta">
+          <h2 class="mat-headline-3">INVOICE</h2>
+          <div class="invoice-details">
+            <div class="detail-row">
+              <span class="mat-body-2 label">Invoice #:</span>
+              <span class="mat-body-1">{{ order.orderNumber }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="mat-body-2 label">Invoice Date:</span>
+              <span class="mat-body-1">{{ formatDate(invoiceDate()) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="mat-body-2 label">Order Date:</span>
+              <span class="mat-body-1">{{ formatDate(order.date) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="mat-body-2 label">Status:</span>
+              <span class="mat-body-1 status">{{ order.status }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Addresses -->
+      <div class="addresses-section">
+        <div class="address-block">
+          <h3 class="mat-headline-6">Bill To:</h3>
+          <p class="mat-body-1"><strong>{{ order.billingAddress.fullName }}</strong></p>
+          <p class="mat-body-2">{{ order.billingAddress.address1 }}</p>
+          @if (order.billingAddress.address2) {
+            <p class="mat-body-2">{{ order.billingAddress.address2 }}</p>
+          }
+          <p class="mat-body-2">
+            {{ order.billingAddress.city }}, {{ order.billingAddress.state }} {{ order.billingAddress.zipCode }}
+          </p>
+          <p class="mat-body-2">{{ order.billingAddress.country }}</p>
+        </div>
+
+        <div class="address-block">
+          <h3 class="mat-headline-6">Ship To:</h3>
+          <p class="mat-body-1"><strong>{{ order.shippingAddress.fullName }}</strong></p>
+          <p class="mat-body-2">{{ order.shippingAddress.address1 }}</p>
+          @if (order.shippingAddress.address2) {
+            <p class="mat-body-2">{{ order.shippingAddress.address2 }}</p>
+          }
+          <p class="mat-body-2">
+            {{ order.shippingAddress.city }}, {{ order.shippingAddress.state }} {{ order.shippingAddress.zipCode }}
+          </p>
+          <p class="mat-body-2">{{ order.shippingAddress.country }}</p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Items table -->
+      <div class="items-section">
+        <h3 class="mat-headline-6">Order Items</h3>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th class="mat-body-2">Item</th>
+              <th class="mat-body-2 text-center">Quantity</th>
+              <th class="mat-body-2 text-right">Unit Price</th>
+              <th class="mat-body-2 text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of order.items; track item.id) {
+              <tr>
+                <td class="mat-body-1">{{ item.name }}</td>
+                <td class="mat-body-1 text-center">{{ item.quantity }}</td>
+                <td class="mat-body-1 text-right">{{ formatCurrency(item.price) }}</td>
+                <td class="mat-body-1 text-right">{{ formatCurrency(getItemTotal(item)) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Totals -->
+      <div class="totals-section">
+        <div class="totals-grid">
+          <div class="total-row">
+            <span class="mat-body-1 label">Subtotal:</span>
+            <span class="mat-body-1 amount">{{ formatCurrency(order.subtotal) }}</span>
+          </div>
+          <div class="total-row">
+            <span class="mat-body-1 label">Tax:</span>
+            <span class="mat-body-1 amount">{{ formatCurrency(order.tax) }}</span>
+          </div>
+          <div class="total-row">
+            <span class="mat-body-1 label">Shipping:</span>
+            <span class="mat-body-1 amount">{{ formatCurrency(order.shipping) }}</span>
+          </div>
+          <div class="total-row total">
+            <span class="mat-headline-6 label">Total:</span>
+            <span class="mat-headline-6 amount">{{ formatCurrency(order.total) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Payment info -->
+      <div class="payment-section">
+        <h3 class="mat-headline-6">Payment Information</h3>
+        <p class="mat-body-1">Payment Method: {{ order.paymentMethod }}</p>
+        <p class="mat-body-2">Payment Status: Paid in Full</p>
+      </div>
+
+      <!-- Footer -->
+      <div class="invoice-footer">
+        <p class="mat-body-2">Thank you for your business!</p>
+        <p class="mat-caption">
+          For questions about this invoice, please contact {{ companyInfo.email }} or call {{ companyInfo.phone }}
+        </p>
+        <p class="mat-caption">Tax ID: {{ companyInfo.taxId }}</p>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="loading-container">
+    <p class="mat-body-1">Loading invoice...</p>
+  </div>
+}

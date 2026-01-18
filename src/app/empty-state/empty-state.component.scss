@@ -1,0 +1,162 @@
+/* Container */
+.empty-state-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 48px 24px;
+}
+
+.empty-state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 500px;
+}
+
+/* Icon */
+.empty-state-icon {
+  margin-bottom: 24px;
+  color: #9e9e9e;
+  opacity: 0.6;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.empty-state-icon mat-icon {
+  display: block;
+}
+
+/* Title */
+.empty-state-title {
+  margin: 0 0 16px 0;
+  color: #424242;
+  font-weight: 500;
+  animation: fadeIn 0.6s ease-in;
+}
+
+/* Message */
+.empty-state-message {
+  margin: 0 0 32px 0;
+  color: #757575;
+  line-height: 1.6;
+  animation: fadeIn 0.7s ease-in;
+}
+
+/* Action */
+.empty-state-action {
+  animation: fadeIn 0.8s ease-in;
+}
+
+.empty-state-action button.with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.empty-state-action button mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Size variations */
+.size-small .empty-state-container {
+  min-height: 300px;
+  padding: 32px 16px;
+}
+
+.size-small .empty-state-icon {
+  margin-bottom: 16px;
+}
+
+.size-small .empty-state-title {
+  margin-bottom: 12px;
+}
+
+.size-small .empty-state-message {
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.size-large .empty-state-container {
+  min-height: 500px;
+  padding: 64px 32px;
+}
+
+.size-large .empty-state-icon {
+  margin-bottom: 32px;
+}
+
+.size-large .empty-state-title {
+  margin-bottom: 20px;
+}
+
+.size-large .empty-state-message {
+  margin-bottom: 40px;
+  font-size: 18px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .empty-state-container {
+    min-height: 300px;
+    padding: 32px 16px;
+  }
+
+  .empty-state-content {
+    max-width: 100%;
+  }
+
+  .empty-state-icon mat-icon {
+    font-size: 48px !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .size-large .empty-state-icon mat-icon {
+    font-size: 64px !important;
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  .empty-state-title {
+    font-size: 20px;
+  }
+
+  .empty-state-message {
+    font-size: 14px;
+  }
+
+  .empty-state-action button {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .empty-state-icon {
+    color: #bdbdbd;
+  }
+
+  .empty-state-title {
+    color: #e0e0e0;
+  }
+
+  .empty-state-message {
+    color: #9e9e9e;
+  }
+}

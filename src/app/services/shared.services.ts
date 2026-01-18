@@ -1,15 +1,18 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { catchError, map } from 'rxjs';
 import { Products } from '../data/product.data';
+import { ErrorHandlerService } from './error-handler.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SharedService {
+  private readonly http = inject(HttpClient);
+  private readonly errorHandler = inject(ErrorHandlerService);
+  
   private apiUrl = environment.apiUrl;
-  constructor(private http: HttpClient) {}
 
   getCartItems() {
     const url = `${this.apiUrl}/cart`;
@@ -40,8 +43,9 @@ export class SharedService {
         }
         return cartObj;
       }),
-      catchError((error) => {
-        throw new Error(error);
+      catchError((error: HttpErrorResponse) => {
+        this.errorHandler.handleHttpError(error);
+        throw error;
       })
     );
   }
@@ -50,10 +54,12 @@ export class SharedService {
     const url = `${this.apiUrl}/orders`;
     return this.http.post(url, payload).pipe(
       map((res: any) => {
+        this.errorHandler.showSuccess('Order placed successfully!');
         return res;
       }),
-      catchError((error) => {
-        throw new Error(error);
+      catchError((error: HttpErrorResponse) => {
+        this.errorHandler.handleHttpError(error);
+        throw error;
       })
     );
   }
@@ -71,8 +77,9 @@ export class SharedService {
         }
         return ordersObj;
       }),
-      catchError((error) => {
-        throw new Error(error);
+      catchError((error: HttpErrorResponse) => {
+        this.errorHandler.handleHttpError(error);
+        throw error;
       })
     );
   }
@@ -81,10 +88,12 @@ export class SharedService {
     const url = `${this.apiUrl}/cart`;
     return this.http.delete(url).pipe(
       map((res: any) => {
+        this.errorHandler.showSuccess('Cart cleared successfully');
         return res;
       }),
-      catchError((error) => {
-        throw new Error(error);
+      catchError((error: HttpErrorResponse) => {
+        this.errorHandler.handleHttpError(error);
+        throw error;
       })
     );
   }
@@ -92,11 +101,10 @@ export class SharedService {
   removeCartItems(cartid: string) {
     const url = `${this.apiUrl}/cart/${cartid}`;
     return this.http.delete(url).pipe(
-      map((res: any) => {
-        return res;
-      }),
-      catchError((error) => {
-        throw new Error(error);
+      map((res: any) => res),
+      catchError((error: HttpErrorResponse) => {
+        this.errorHandler.handleHttpError(error);
+        throw error;
       })
     );
   }
@@ -119,8 +127,9 @@ export class SharedService {
         });
         return res;
       }),
-      catchError((error) => {
-        throw new Error(error);
+      catchError((error: HttpErrorResponse) => {
+        this.errorHandler.handleHttpError(error);
+        throw error;
       })
     );
   }
@@ -132,11 +141,10 @@ export class SharedService {
   addToCart(payload: any) {
     const url = `${this.apiUrl}/cart`;
     return this.http.post(url, payload).pipe(
-      map((res: any) => {
-        return res;
-      }),
-      catchError((error) => {
-        throw new Error(error);
+      map((res: any) => res),
+      catchError((error: HttpErrorResponse) => {
+        this.errorHandler.handleHttpError(error);
+        throw error;
       })
     );
   }
