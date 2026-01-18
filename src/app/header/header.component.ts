@@ -1,47 +1,48 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { AuthResponseData } from "../services/auth.service";
-import { AlertMessageService } from "../alerts/alertmsg.service";
-import { Subject, takeUntil } from "rxjs";
-import { Store } from '@ngrx/store';
-import * as commonactions from "src/app/store/common.actions"
-import { selectAuthStatus } from "../store/common.selectors";
+import { Component, computed, ChangeDetectionStrategy, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { RouterModule } from "@angular/router";
+import { MatToolbarModule } from "@angular/material/toolbar";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatMenuModule } from "@angular/material/menu";
+import { MatDialogModule, MatDialog } from "@angular/material/dialog";
+import { MatDividerModule } from "@angular/material/divider";
+import { SnackbarService } from "../services/snackbar.service";
+import { AuthStore } from "../store/auth.store";
 
 @Component({
     selector: "app-header",
     templateUrl: "./header.component.html",
-    styleUrls: ["./header.component.css"],
-    standalone: false
+    styleUrls: ["./header.component.scss"],
+    standalone: true,
+    imports: [
+      CommonModule,
+      RouterModule,
+      MatToolbarModule,
+      MatButtonModule,
+      MatIconModule,
+      MatMenuModule,
+      MatDialogModule,
+      MatDividerModule
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HeaderComponent implements OnInit {
-  isCollapsed = false;
-  userdetails: AuthResponseData;
-  @ViewChild("logout") logout: NgbModal;
-  destroy$: Subject<boolean> = new Subject<boolean>();
+export class HeaderComponent {
+  // Inject AuthStore
+  readonly authStore = inject(AuthStore);
+  
+  // Computed signals for UI
+  isAuthenticated = computed(() => this.authStore.isLoggedIn());
+  userEmail = computed(() => this.authStore.userEmail());
 
   constructor(
-    private alertMsg: AlertMessageService,
-    private modalService: NgbModal,
-    private store: Store
+    private snackbar: SnackbarService,
+    private dialog: MatDialog
   ) {}
 
-  ngOnInit(): void {
-    this.getUserDetails();
-  }
-
-  getUserDetails(){
-    this.store.select(selectAuthStatus).pipe(takeUntil(this.destroy$)).subscribe((res) => {
-      res.loggedInUserDetails ? this.userdetails = res.loggedInUserDetails : this.userdetails = null;
-      res.error ? this.alertMsg.alertDanger(res.error) : null;
-    })
-  }
-
-  openVerticallyCentered(content) {
-    this.modalService.open(content, { size: "lg" });
-  }
-
-  onLogout() {
-    this.modalService.dismissAll();
-    this.store.dispatch(commonactions.AuthPageActions.logoutUser());
+  onLogout(): void {
+    if (confirm('Are you sure you want to logout?')) {
+      this.authStore.logout();
+    }
   }
 }

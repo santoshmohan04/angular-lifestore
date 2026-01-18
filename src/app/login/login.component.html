@@ -5,75 +5,72 @@
 <div class="outer-box">
   <div class="inner-box">
       <header class="signup-header">
+          <mat-icon class="auth-icon">login</mat-icon>
           <h1>Login</h1>
-          <!-- <p>It just takes 30 seconds</p> -->
       </header>
       <main class="signup-body">
-        <form
-        [formGroup]="authForm"
-        (ngSubmit)="onlogin(authForm)"
-      >
-        <div class="mb-3 mt-3">
-          <label for="email">Email:</label>
-          <input
-            type="email"
-            class="form-control"
-            id="email"
-            formControlName="userEmail"
-            placeholder="Enter email"
-            name="email"
-          />
-        </div>
-        <div class="mb-3">
-          <label for="pwd">Password:</label>
-          <div class="input-group">
+        <form [formGroup]="authForm" (ngSubmit)="onlogin(authForm)">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
             <input
-              [type]="showPassword ? 'text' : 'password'"
-              class="form-control"
-              id="pwd"
+              matInput
+              type="email"
+              formControlName="userEmail"
+              placeholder="Enter your email"
+            />
+            <mat-icon matPrefix>email</mat-icon>
+            <mat-error *ngIf="authForm.get('userEmail')?.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="authForm.get('userEmail')?.hasError('email')">
+              Please enter a valid email
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              [type]="showPassword() ? 'text' : 'password'"
               formControlName="userPswd"
-              placeholder="Enter password"
-              name="pswd"
+              placeholder="Enter your password"
             />
-            <a
-              class="input-group-text"
-              (click)="showPassword = !showPassword"
+            <mat-icon matPrefix>lock</mat-icon>
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="showPassword.set(!showPassword())"
+              [attr.aria-label]="'Toggle password visibility'"
             >
-              <em
-                id="changePassIcon"
-                [ngClass]="{
-                  'bi bi-eye': !showPassword,
-                  'bi bi-eye-slash': showPassword
-                }"
-              >
-              </em>
-            </a>
+              <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="authForm.get('userPswd')?.hasError('required')">
+              Password is required
+            </mat-error>
+          </mat-form-field>
+
+          <div class="remember-me">
+            <mat-checkbox formControlName="rememberMe">
+              Remember me
+            </mat-checkbox>
           </div>
-        </div>
-        <div class="form-check mb-3">
-          <label class="form-check-label">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="remember"
-              [(ngModel)]="isChecked"
-              [ngModelOptions]="{ standalone: true }"
-            />
-            Remember me
-          </label>
-        </div>
-        <button
-          type="submit"
-          class="btn btn-primary mb-3"
-          [disabled]="authForm.invalid"
-        >
-          Submit
-        </button>
-      </form>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="full-width submit-btn"
+            [disabled]="authForm.invalid"
+          >
+            <mat-icon>login</mat-icon>
+            Login
+          </button>
+        </form>
       </main>
 
       <footer class="signup-footer">
-          <p>Already have an Account? <a routerLink="/signup">Signup</a> </p>
+          <p>Don't have an account? <a routerLink="/signup">Sign up</a></p>
       </footer>
 
   </div>
@@ -86,75 +83,95 @@
 <div class="outer-box">
   <div class="inner-box">
       <header class="signup-header">
-          <h1>Signup</h1>
+          <mat-icon class="auth-icon">person_add</mat-icon>
+          <h1>Sign Up</h1>
           <p>It just takes 30 seconds</p>
       </header>
       <main class="signup-body">
-        <form
-        [formGroup]="authForm"
-        (ngSubmit)="onlogin(authForm)"
-      >
-        <div class="mb-3 mt-3">
-          <label for="email">Email:</label>
-          <input
-            type="email"
-            class="form-control"
-            id="email"
-            formControlName="userEmail"
-            placeholder="Enter email"
-            name="email"
-          />
-        </div>
-        <div class="mb-3">
-          <label for="pwd">Password:</label>
-          <div class="input-group">
+        <form [formGroup]="signupForm" (ngSubmit)="onSignup(signupForm)">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>First Name</mat-label>
             <input
-              [type]="showPassword ? 'text' : 'password'"
-              class="form-control"
-              id="pwd"
-              formControlName="userPswd"
-              placeholder="Enter password"
-              name="pswd"
+              matInput
+              type="text"
+              formControlName="firstName"
+              placeholder="Enter first name"
             />
-            <a
-              class="input-group-text"
-              (click)="showPassword = !showPassword"
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-error *ngIf="signupForm.get('firstName')?.hasError('required')">
+              First name is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Last Name</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="lastName"
+              placeholder="Enter last name"
+            />
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-error *ngIf="signupForm.get('lastName')?.hasError('required')">
+              Last name is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input
+              matInput
+              type="email"
+              formControlName="sigupEmail"
+              placeholder="Enter your email"
+            />
+            <mat-icon matPrefix>email</mat-icon>
+            <mat-error *ngIf="signupForm.get('sigupEmail')?.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="signupForm.get('sigupEmail')?.hasError('email')">
+              Please enter a valid email
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="signupPswd"
+              placeholder="Enter your password"
+            />
+            <mat-icon matPrefix>lock</mat-icon>
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="showPassword.set(!showPassword())"
+              [attr.aria-label]="'Toggle password visibility'"
             >
-              <em
-                id="changePassIcon"
-                [ngClass]="{
-                  'bi bi-eye': !showPassword,
-                  'bi bi-eye-slash': showPassword
-                }"
-              >
-              </em>
-            </a>
-          </div>
-        </div>
-        <div class="form-check mb-3">
-          <label class="form-check-label">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="remember"
-              [(ngModel)]="isChecked"
-              [ngModelOptions]="{ standalone: true }"
-            />
-            Remember me
-          </label>
-        </div>
-        <button
-          type="submit"
-          class="btn btn-primary mb-3"
-          [disabled]="authForm.invalid"
-        >
-          Submit
-        </button>
-      </form>
+              <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="signupForm.get('signupPswd')?.hasError('required')">
+              Password is required
+            </mat-error>
+          </mat-form-field>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="full-width submit-btn"
+            [disabled]="signupForm.invalid"
+          >
+            <mat-icon>person_add</mat-icon>
+            Sign Up
+          </button>
+        </form>
       </main>
 
       <footer class="signup-footer">
-          <p>Already have an Account? <a routerLink="/auth">Login</a> </p>
+          <p>Already have an account? <a routerLink="/auth">Login</a></p>
       </footer>
 
   </div>
@@ -166,6 +183,7 @@
 
 <ng-template #loadingtemp>
   <div class="loader">
-    <app-loading-spinner></app-loading-spinner>
+    <mat-spinner diameter="60"></mat-spinner>
+    <p class="mat-body-1" style="margin-top: 20px; color: #555;">Loading...</p>
   </div>
 </ng-template>

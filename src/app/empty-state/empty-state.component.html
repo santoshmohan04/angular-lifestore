@@ -1,0 +1,32 @@
+<div class="empty-state-container" [class]="'size-' + size">
+  <div class="empty-state-content">
+    <div class="empty-state-icon">
+      <mat-icon [style.font-size.px]="iconSize" [style.width.px]="iconSize" [style.height.px]="iconSize">
+        {{ icon }}
+      </mat-icon>
+    </div>
+    
+    <h2 [class]="titleClass + ' empty-state-title'">
+      {{ title }}
+    </h2>
+    
+    <p class="mat-body-1 empty-state-message">
+      {{ message }}
+    </p>
+    
+    @if (actionText) {
+      <div class="empty-state-action">
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="onActionClick()"
+          [class.with-icon]="actionIcon">
+          @if (actionIcon) {
+            <mat-icon>{{ actionIcon }}</mat-icon>
+          }
+          {{ actionText }}
+        </button>
+      </div>
+    }
+  </div>
+</div>

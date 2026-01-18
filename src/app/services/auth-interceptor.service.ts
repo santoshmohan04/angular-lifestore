@@ -1,37 +1,38 @@
-import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { take, exhaustMap, tap } from 'rxjs/operators';
-import { Store } from '@ngrx/store';
-import * as commonactions from "src/app/store/common.actions";
-import { AlertMessageService } from '../alerts/alertmsg.service';
-import { selectAuthStatus } from '../store/common.selectors';
+import { Injectable, inject } from '@angular/core';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpErrorResponse } from '@angular/common/http';
+import { tap } from 'rxjs/operators';
+import { AuthStore } from '../store/auth.store';
+import { SnackbarService } from './snackbar.service';
 
 @Injectable()
 export class AuthInterceptorService implements HttpInterceptor {
-  constructor(private alertmsg: AlertMessageService, private store: Store) {}
+  private readonly authStore = inject(AuthStore);
+  private readonly snackbar = inject(SnackbarService);
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
-    return this.store.select(selectAuthStatus).pipe(
-      take(1),
-      exhaustMap((user) => {
-        if (!user.loggedInUserDetails) {
-          return next.handle(req);
-        }
-        const modifiedReq = req.clone({
-          params: new HttpParams().set('auth', user.loggedInUserDetails.idToken),
-        });
-        return next.handle(modifiedReq).pipe(
-          tap({
-            next: () => {},
-            error: (err: HttpErrorResponse) => {
-              console.log(err);
-              if (err.status === 401 && err.statusText === 'Unauthorized') {
-                this.store.dispatch(commonactions.AuthPageActions.logoutUser());
-                this.alertmsg.alertDanger('Session Expired kindly login');
-              }
-            },
-          })
-        );
+    const token = this.authStore.token();
+    
+    // If no token, proceed without modification
+    if (!token) {
+      return next.handle(req);
+    }
+    
+    // Add Bearer token to Authorization header
+    const modifiedReq = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    
+    return next.handle(modifiedReq).pipe(
+      tap({
+        next: () => {},
+        error: (err: HttpErrorResponse) => {
+          if (err.status === 401) {
+            this.authStore.logout();
+            this.snackbar.showError('Session expired. Please login again.');
+          }
+        },
       })
     );
   }

@@ -1,138 +1,136 @@
-<div class="container p-5 mt-5">
-  <div class="d-flex">
-    <div ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills flex-column" orientation="vertical">
-      <ng-container ngbNavItem="pswd">
-        <button ngbNavLink>Change Password</button>
-        <ng-template ngbNavContent>
-          <div class="card">
+<div class="settings-container">
+  <mat-tab-group [(selectedIndex)]="selectedTabIndex" animationDuration="300ms">
+    <mat-tab label="Change Password">
+      <mat-card class="tab-content">
+        <mat-card-content>
           <div class="alert alert-danger" *ngIf="error">
             <p>{{ error }}</p>
           </div>
-          <div *ngIf="isLoading" class="loader">
-            <app-loading-spinner></app-loading-spinner>
+          <div *ngIf="isLoading()" class="loader">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p style="margin-top: 16px; color: #666;">Processing...</p>
           </div>
           <form
             #chngpswdForm="ngForm"
             (ngSubmit)="onChange(chngpswdForm)"
-            *ngIf="!isLoading"
+            *ngIf="!isLoading()"
           >
-            <div class="mb-3">
-              <label for="email">Enter new Password</label>
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Enter new Password</mat-label>
               <input
+                matInput
                 type="password"
-                class="form-control"
                 name="newpswd"
                 id="newpswd"
                 ngModel
                 required
                 minlength="6"
               />
-            </div>
-            <div class="mb-3">
-              <label for="email">Conform the Password</label>
+            </mat-form-field>
+
+            <mat-form-field class="full-width" appearance="outline">
+              <mat-label>Confirm the Password</mat-label>
               <input
+                matInput
                 type="password"
-                class="form-control"
                 name="repswd"
                 id="repswd"
                 ngModel
                 required
                 minlength="6"
               />
-            </div>
+            </mat-form-field>
+
             <button
+              mat-raised-button
+              color="primary"
               type="submit"
               name="chngpsw"
-              class="btn btn-primary"
               [disabled]="!chngpswdForm.valid"
             >
-              Change
+              Change Password
             </button>
           </form>
-        </div>
-        </ng-template>
-      </ng-container>
-      <ng-container ngbNavItem="orders">
-        <button ngbNavLink>Orders</button>
-        <ng-template ngbNavContent>
-            <div ngbAccordion [closeOthers]="true" *ngIf="itemDates" style="width: 600px;">
-              @for (item of itemDates; track item; let i = $index) {
-                <div ngbAccordionItem>
-                  <h2 ngbAccordionHeader>
-                    <button ngbAccordionButton>Ordered Data & Time: {{ item }}</button>
-                  </h2>
-                  <div ngbAccordionCollapse>
-                    <div ngbAccordionBody>
-                      <ng-template>
-                        <table
-                        class="table table-striped table-hover"
-                        aria-describedby="userOrders"
-                      >
-                        <thead class="table-dark">
-                          <tr>
-                            <th>Item Id</th>
-                            <th>Image</th>
-                            <th>Item Name</th>
-                            <th>Price</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr *ngFor="let x of userItems[i]">
-                            <td>{{ x.id }}</td>
-                            <td>
-                              <img
-                                src="assets/{{ x.image }}"
-                                alt="{{ x.name }}"
-                                class="card-img-top"
-                                height="60px"
-                              />
-                            </td>
-                            <td>{{ x.name }}</td>
-                            <td>Rs.{{ x.price }}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                      </ng-template>
-                    </div>
-                  </div>
-                </div>
-              }
-            </div>
-        </ng-template>
-      </ng-container>
-      <ng-container ngbNavItem="profile">
-        <button ngbNavLink>Profile</button>
-        <ng-template ngbNavContent>
-          <div class="card">
-          <h3 style="text-align: center; color: blue">User Profile</h3>
-          <div class="row">
-            <div class="col-sm-4">
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+
+    <mat-tab label="Orders">
+      <mat-card class="tab-content">
+        <mat-card-content>
+          <div *ngIf="userOrds.length > 0">
+            @for (order of userOrds; track order.id; let i = $index) {
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Order Date: {{ order.date | date:'medium' }}
+                  </mat-panel-title>
+                  <mat-panel-description>
+                    Total: Rs.{{ order.total | number }}
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+                <table class="order-table" aria-describedby="userOrders">
+                  <thead>
+                    <tr>
+                      <th>Product ID</th>
+                      <th>Image</th>
+                      <th>Item Name</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of order.items">
+                      <td>{{ item.productId }}</td>
+                      <td>
+                        <img
+                          [src]="item.image | imagePath"
+                          alt="{{ item.name }}"
+                          height="60px"
+                        />
+                      </td>
+                      <td>{{ item.name }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td>Rs.{{ item.price | number }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </mat-expansion-panel>
+            }
+          </div>
+          <div *ngIf="userOrds.length === 0" class="alert alert-info">
+            <p>No orders found.</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+
+    <mat-tab label="Profile">
+      <mat-card class="tab-content">
+        <mat-card-content>
+          <h3 class="profile-title">User Profile</h3>
+          <div class="profile-content">
+            <div class="profile-image">
               <img
                 src='assets/img/dummy-user.png'
-                [alt]="userdetails.displayName"
+                alt="userprofile"
                 height="120px"
               />
             </div>
-            <div class="col-sm-8">
+            <div class="profile-info">
               <p>
-                Hello: <strong>{{ userdetails.displayName ? userdetails.displayName : "User" }}</strong>
+                Hello: <strong>{{ userdetails().user.firstName + ' ' + userdetails().user.lastName }}</strong>
               </p>
               <p>
-                User ID: <strong>{{ userdetails.localId }}</strong>
+                User ID: <strong>{{ userdetails().user.id }}</strong>
               </p>
               <p>
-                Email: <strong>{{ userdetails.email }}</strong>
-              </p>
-              <p>
-                Email Verified: <strong>{{ userdetails.registered }}</strong>
+                Email: <strong>{{ userdetails().user.email }}</strong>
               </p>
             </div>
           </div>
-        </div>
-        </ng-template>
-      </ng-container>
-    </div>
-  
-    <div [ngbNavOutlet]="nav" class="ms-4"></div>
-  </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+  </mat-tab-group>
 </div>

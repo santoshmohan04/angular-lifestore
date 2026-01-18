@@ -1,0 +1,376 @@
+<div class="checkout-container">
+  <div class="checkout-header">
+    <h1>
+      <mat-icon>shopping_cart_checkout</mat-icon>
+      Checkout
+    </h1>
+  </div>
+
+  @if (!orderPlaced()) {
+    <mat-stepper linear #stepper>
+      <!-- Step 1: Cart Review -->
+      <mat-step label="Cart Review" state="cart">
+        <div class="step-content">
+          <h2>Review Your Cart</h2>
+          
+          @if (cartStore.loading()) {
+            <div class="loading-container">
+              <mat-spinner></mat-spinner>
+              <p>Loading cart...</p>
+            </div>
+          } @else if (hasItems()) {
+            <div class="cart-items">
+              @for (item of cartItems(); track item.id) {
+                <mat-card class="cart-item-card">
+                  <div class="item-content">
+                    <img [src]="item.image | imagePath" [alt]="item.name" class="item-image" />
+                    
+                    <div class="item-details">
+                      <h3>{{ item.name }}</h3>
+                      <p class="item-price">${{ item.price }}</p>
+                      <p class="item-quantity">Quantity: {{ item.qty }}</p>
+                    </div>
+                    
+                    <div class="item-total">
+                      <p class="total-label">Total</p>
+                      <p class="total-price">${{ getItemTotal(item) | number:'1.2-2' }}</p>
+                    </div>
+                  </div>
+                </mat-card>
+              }
+            </div>
+
+            <mat-card class="summary-card">
+              <mat-card-content>
+                <div class="summary-row">
+                  <span>Subtotal ({{ itemCount() }} items):</span>
+                  <span class="summary-value">${{ subtotal() | number:'1.2-2' }}</span>
+                </div>
+                <div class="summary-row">
+                  <span>Tax (18%):</span>
+                  <span class="summary-value">${{ tax() | number:'1.2-2' }}</span>
+                </div>
+                <div class="summary-row">
+                  <span>Shipping:</span>
+                  <span class="summary-value">${{ shipping() | number:'1.2-2' }}</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="summary-row total-row">
+                  <span><strong>Total:</strong></span>
+                  <span class="summary-value total-value">${{ total() | number:'1.2-2' }}</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <div class="step-actions">
+              <button mat-button routerLink="/cart">
+                <mat-icon>edit</mat-icon>
+                Edit Cart
+              </button>
+              <button mat-raised-button color="primary" matStepperNext>
+                Continue
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>shopping_cart</mat-icon>
+              <p>Your cart is empty</p>
+              <button mat-raised-button color="primary" routerLink="/products">
+                Start Shopping
+              </button>
+            </div>
+          }
+        </div>
+      </mat-step>
+
+      <!-- Step 2: Shipping Address -->
+      <mat-step label="Shipping Address" state="location_on" [stepControl]="addressForm">
+        <div class="step-content">
+          <h2>Shipping Address</h2>
+          
+          <form [formGroup]="addressForm" class="address-form">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Full Name</mat-label>
+                <input matInput formControlName="fullName" placeholder="John Doe" />
+                <mat-icon matPrefix>person</mat-icon>
+                @if (f['fullName'].hasError('required')) {
+                  <mat-error>Full name is required</mat-error>
+                }
+                @if (f['fullName'].hasError('minlength')) {
+                  <mat-error>Name must be at least 3 characters</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email" type="email" placeholder="john@example.com" />
+                <mat-icon matPrefix>email</mat-icon>
+                @if (f['email'].hasError('required')) {
+                  <mat-error>Email is required</mat-error>
+                }
+                @if (f['email'].hasError('email')) {
+                  <mat-error>Invalid email format</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Phone</mat-label>
+                <input matInput formControlName="phone" placeholder="1234567890" />
+                <mat-icon matPrefix>phone</mat-icon>
+                @if (f['phone'].hasError('required')) {
+                  <mat-error>Phone is required</mat-error>
+                }
+                @if (f['phone'].hasError('pattern')) {
+                  <mat-error>Enter valid 10-digit phone</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Address Line 1</mat-label>
+                <input matInput formControlName="addressLine1" placeholder="123 Main Street" />
+                <mat-icon matPrefix>home</mat-icon>
+                @if (f['addressLine1'].hasError('required')) {
+                  <mat-error>Address is required</mat-error>
+                }
+                @if (f['addressLine1'].hasError('minlength')) {
+                  <mat-error>Address must be at least 5 characters</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Address Line 2 (Optional)</mat-label>
+                <input matInput formControlName="addressLine2" placeholder="Apt 4B" />
+                <mat-icon matPrefix>apartment</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="third-width">
+                <mat-label>City</mat-label>
+                <input matInput formControlName="city" placeholder="New York" />
+                @if (f['city'].hasError('required')) {
+                  <mat-error>City is required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="third-width">
+                <mat-label>State</mat-label>
+                <input matInput formControlName="state" placeholder="NY" />
+                @if (f['state'].hasError('required')) {
+                  <mat-error>State is required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="third-width">
+                <mat-label>ZIP Code</mat-label>
+                <input matInput formControlName="zipCode" placeholder="10001" />
+                @if (f['zipCode'].hasError('required')) {
+                  <mat-error>ZIP is required</mat-error>
+                }
+                @if (f['zipCode'].hasError('pattern')) {
+                  <mat-error>Enter valid ZIP</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Country</mat-label>
+                <input matInput formControlName="country" placeholder="United States" />
+                <mat-icon matPrefix>public</mat-icon>
+                @if (f['country'].hasError('required')) {
+                  <mat-error>Country is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </form>
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon>
+              Back
+            </button>
+            <button 
+              mat-raised-button 
+              color="primary" 
+              matStepperNext
+              [disabled]="!addressForm.valid">
+              Continue
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-step>
+
+      <!-- Step 3: Order Summary -->
+      <mat-step label="Review Order" state="receipt">
+        <div class="step-content">
+          <h2>Order Summary</h2>
+          
+          <div class="summary-section">
+            <mat-card class="info-card">
+              <mat-card-header>
+                <mat-icon mat-card-avatar>local_shipping</mat-icon>
+                <mat-card-title>Shipping Address</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p><strong>{{ addressForm.value.fullName }}</strong></p>
+                <p>{{ addressForm.value.addressLine1 }}</p>
+                @if (addressForm.value.addressLine2) {
+                  <p>{{ addressForm.value.addressLine2 }}</p>
+                }
+                <p>{{ addressForm.value.city }}, {{ addressForm.value.state }} {{ addressForm.value.zipCode }}</p>
+                <p>{{ addressForm.value.country }}</p>
+                <mat-divider></mat-divider>
+                <p><mat-icon>email</mat-icon> {{ addressForm.value.email }}</p>
+                <p><mat-icon>phone</mat-icon> {{ addressForm.value.phone }}</p>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="info-card">
+              <mat-card-header>
+                <mat-icon mat-card-avatar>shopping_bag</mat-icon>
+                <mat-card-title>Order Items ({{ itemCount() }})</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-list>
+                  @for (item of cartItems(); track item.id) {
+                    <mat-list-item>
+                      <img matListItemAvatar [src]="item.image | imagePath" [alt]="item.name" />
+                      <div matListItemTitle>{{ item.name }}</div>
+                      <div matListItemLine>Qty: {{ item.qty }} × ${{ item.price }}</div>
+                      <div matListItemMeta class="item-meta">
+                        ${{ getItemTotal(item) | number:'1.2-2' }}
+                      </div>
+                    </mat-list-item>
+                    <mat-divider></mat-divider>
+                  }
+                </mat-list>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="info-card">
+              <mat-card-header>
+                <mat-icon mat-card-avatar>account_balance_wallet</mat-icon>
+                <mat-card-title>Payment Summary</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="summary-row">
+                  <span>Subtotal:</span>
+                  <span>${{ subtotal() | number:'1.2-2' }}</span>
+                </div>
+                <div class="summary-row">
+                  <span>Tax (18%):</span>
+                  <span>${{ tax() | number:'1.2-2' }}</span>
+                </div>
+                <div class="summary-row">
+                  <span>Shipping:</span>
+                  <span>${{ shipping() | number:'1.2-2' }}</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="summary-row total-row">
+                  <span><strong>Total Amount:</strong></span>
+                  <span class="total-value"><strong>${{ total() | number:'1.2-2' }}</strong></span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon>
+              Back
+            </button>
+            <button mat-raised-button color="primary" matStepperNext>
+              Continue
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-step>
+
+      <!-- Step 4: Place Order -->
+      <mat-step label="Place Order" state="done">
+        <div class="step-content">
+          <div class="confirmation-content">
+            <mat-icon class="confirm-icon">check_circle</mat-icon>
+            <h2>Ready to Place Order</h2>
+            <p class="confirm-message">
+              Your order total is <strong>${{ total() | number:'1.2-2' }}</strong>
+            </p>
+            <p class="confirm-note">
+              By placing this order, you agree to our terms and conditions.
+            </p>
+
+            <div class="step-actions">
+              <button mat-button matStepperPrevious [disabled]="isProcessing()">
+                <mat-icon>arrow_back</mat-icon>
+                Back
+              </button>
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="placeOrder()"
+                [disabled]="isProcessing()">
+                @if (isProcessing()) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                  Processing...
+                } @else {
+                  <mat-icon>payment</mat-icon>
+                  Place Order
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      </mat-step>
+
+      <!-- Custom Icons for Steps -->
+      <ng-template matStepperIcon="cart">
+        <mat-icon>shopping_cart</mat-icon>
+      </ng-template>
+      <ng-template matStepperIcon="location_on">
+        <mat-icon>location_on</mat-icon>
+      </ng-template>
+      <ng-template matStepperIcon="receipt">
+        <mat-icon>receipt</mat-icon>
+      </ng-template>
+      <ng-template matStepperIcon="done">
+        <mat-icon>done</mat-icon>
+      </ng-template>
+    </mat-stepper>
+  } @else {
+    <!-- Order Success -->
+    <div class="success-container">
+      <mat-card class="success-card">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <h1>Order Placed Successfully!</h1>
+        <p class="order-number">Order Number: <strong>{{ orderNumber() }}</strong></p>
+        <p class="success-message">
+          Thank you for your order! A confirmation email has been sent to <strong>{{ userEmail() }}</strong>
+        </p>
+        
+        <mat-divider></mat-divider>
+        
+        <div class="success-actions">
+          <button mat-raised-button color="primary" (click)="continueShopping()">
+            <mat-icon>shopping_bag</mat-icon>
+            Continue Shopping
+          </button>
+          <button mat-stroked-button (click)="viewOrders()">
+            <mat-icon>receipt_long</mat-icon>
+            View Orders
+          </button>
+        </div>
+      </mat-card>
+    </div>
+  }
+</div>

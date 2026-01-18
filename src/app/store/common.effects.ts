@@ -6,8 +6,8 @@ import * as commonActions from "./common.actions";
 import { AuthResponseData, AuthService } from "../services/auth.service";
 import { SharedService } from "../services/shared.services";
 import { Products } from "../data/product.data";
-import { AlertMessageService } from "../alerts/alertmsg.service";
 import { Router } from "@angular/router";
+import { SnackbarService } from "../services/snackbar.service";
 
 @Injectable()
 export class CommonEffects {
@@ -15,8 +15,8 @@ export class CommonEffects {
     private readonly actions$: Actions,
     private readonly router: Router,
     private readonly authservice: AuthService,
-    private readonly alertMsg: AlertMessageService,
-    private readonly shareservice: SharedService
+    private readonly shareservice: SharedService,
+    private readonly snackbar: SnackbarService
   ) {}
 
   loginUser$ = createEffect(() => {
@@ -25,15 +25,9 @@ export class CommonEffects {
       exhaustMap((action) =>
         this.authservice.login(action.payload).pipe(
           map((response: AuthResponseData) => {
-            console.log("Login Success Response:", response); // Debug log
   
-            if (response.expiresIn) {
-              const expiresInMs = parseInt(response.expiresIn) * 1000;
-              localStorage.setItem('tokenExpirationDuration', expiresInMs.toString());
-              this.authservice.autoLogout(expiresInMs);
-  
+            if (response.access_token) {
               localStorage.setItem("authdata", JSON.stringify(response));
-              console.log("Stored in localStorage:", localStorage.getItem("authdata"));
             } else {
               console.warn("Warning: expiresIn is missing in response.");
             }
@@ -41,7 +35,6 @@ export class CommonEffects {
             return commonActions.AuthPageActions.loginUserSuccess({ data: response });
           }),
           catchError((error: any) => {
-            console.error("Login Error:", error);
             return of(commonActions.AuthPageActions.loginUserFailure({ error }));
           })
         )
@@ -63,8 +56,7 @@ export class CommonEffects {
       exhaustMap((action) =>
         this.authservice.signup(action.payload).pipe(
           map((response: AuthResponseData) => {
-            if(response.expiresIn){
-              this.authservice.autoLogout(parseInt(response.expiresIn) * 1000);
+            if(response.access_token){
               localStorage.setItem("authdata", JSON.stringify(response));
             }
             return commonActions.AuthPageActions.signupUserSuccess({
@@ -86,7 +78,7 @@ export class CommonEffects {
         this.authservice.chngpswd(action.payload).pipe(
           map((response: AuthResponseData) => {
             if(response){
-              this.alertMsg.alertSuccess(
+              this.snackbar.showSuccess(
                 "Password Changed, Relogin with new password"
               );
               this.authservice.logout();
@@ -145,7 +137,7 @@ export class CommonEffects {
       exhaustMap((action) =>
         this.shareservice.addToCart(action.payload).pipe(
           map((response: Products) => {
-            this.alertMsg.alertSuccess("Added to Cart");
+            this.snackbar.showSuccess("Added to Cart");
             return commonActions.ProductsPageActions.addProductToCartSuccess({
               data: response,
             });
@@ -163,13 +155,10 @@ export class CommonEffects {
       ofType(commonActions.CartPageActions.removeProductFromCart),
       exhaustMap((action) =>
         this.shareservice.removeCartItems(action.id).pipe(
-          map((response: Products) => {
-            if (response === null) {
-              this.alertMsg.alertInfo("Removed from Cart");
-            }
-            return commonActions.CartPageActions.removeProductFromCartSuccess({
-              data: response,
-            });
+          map((response: any) => {
+            this.snackbar.showInfo("Removed from Cart");
+            // Fetch updated cart items after successful deletion
+            return commonActions.CartPageActions.fetchCartItems();
           }),
           catchError((error: any) =>
             of(commonActions.CartPageActions.removeProductFromCartFailure(error))
@@ -184,10 +173,10 @@ export class CommonEffects {
       ofType(commonActions.CartPageActions.clearCart),
       exhaustMap(() =>
         this.shareservice.clearCart().pipe(
-          map((response: Products) => {
-            return commonActions.CartPageActions.clearCartSuccess({
-              data: response,
-            });
+          map((response: any) => {
+            this.snackbar.showSuccess("Cart cleared successfully");
+            // Fetch updated cart items after successful clear
+            return commonActions.CartPageActions.fetchCartItems();
           }),
           catchError((error: any) =>
             of(commonActions.CartPageActions.clearCartFailure(error))
@@ -220,7 +209,8 @@ export class CommonEffects {
       ofType(commonActions.UserActions.conformUserOrders),
       exhaustMap((action) =>
         this.shareservice.conformOrder(action.payload).pipe(
-          map((response: Products) => {
+          map((response: any) => {
+            this.snackbar.showSuccess("Order placed successfully! Thank you for shopping with us.");
             return commonActions.UserActions.conformUserOrdersSuccess({
               data: response,
             });
@@ -236,18 +226,10 @@ export class CommonEffects {
   removeCartItem$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(commonActions.UserActions.conformUserOrdersSuccess),
-      exhaustMap(() =>
-        this.shareservice.clearCart().pipe(
-          map((response: Products) => {
-            return commonActions.CartPageActions.clearCartSuccess({
-              data: response,
-            });
-          }),
-          catchError((error: any) =>
-            of(commonActions.CartPageActions.clearCartFailure(error))
-          )
-        )
-      )
+      map(() => {
+        // Re-fetch cart items after successful order to show empty cart
+        return commonActions.CartPageActions.fetchCartItems();
+      })
     );
   });
 

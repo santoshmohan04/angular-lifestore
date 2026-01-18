@@ -1,0 +1,190 @@
+<div class="orders-container">
+  <!-- Header -->
+  <div class="orders-header">
+    <h1>
+      <mat-icon>receipt_long</mat-icon>
+      My Orders
+    </h1>
+    @if (hasOrders() && !isLoading()) {
+      <p class="orders-count">{{ totalOrders() }} order{{ totalOrders() === 1 ? '' : 's' }}</p>
+    }
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="60"></mat-spinner>
+      <p>Loading your orders...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (!isLoading() && error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon color="warn">error</mat-icon>
+        <h3>Failed to Load Orders</h3>
+        <p>{{ error() }}</p>
+        <button mat-raised-button color="primary" (click)="loadOrders()">
+          <mat-icon>refresh</mat-icon>
+          Try Again
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && !error() && !hasOrders()) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">inbox</mat-icon>
+      <h2>No Orders Yet</h2>
+      <p>You haven't placed any orders yet. Start shopping to see your orders here!</p>
+      <button mat-raised-button color="primary" routerLink="/products">
+        <mat-icon>shopping_bag</mat-icon>
+        Start Shopping
+      </button>
+    </div>
+  }
+
+  <!-- Orders List -->
+  @if (!isLoading() && !error() && hasOrders()) {
+    <mat-accordion class="orders-accordion" multi>
+      @for (order of orders(); track order.id) {
+        <mat-expansion-panel class="order-panel">
+          <!-- Panel Header -->
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <div class="panel-title-content">
+                <mat-icon class="order-icon">{{ getStatusIcon(order.status) }}</mat-icon>
+                <div class="order-summary">
+                  <span class="order-number">{{ order.orderNumber }}</span>
+                  <span class="order-date">{{ formatDate(order.date) }}</span>
+                </div>
+              </div>
+            </mat-panel-title>
+            <mat-panel-description>
+              <div class="panel-description-content">
+                <mat-chip [color]="getStatusColor(order.status)" selected>
+                  {{ order.status | titlecase }}
+                </mat-chip>
+                <span class="order-total">${{ order.total | number:'1.2-2' }}</span>
+              </div>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <!-- Panel Content -->
+          <div class="panel-content">
+            <!-- Order Items -->
+            <div class="order-items-section">
+              <h3>
+                <mat-icon>shopping_bag</mat-icon>
+                Order Items
+              </h3>
+              <mat-list>
+                @for (item of order.items; track item.productId) {
+                  <mat-list-item>
+                    <img 
+                      matListItemAvatar 
+                      [src]="'assets/' + item.image" 
+                      [alt]="item.name"
+                      class="item-image" />
+                    <div matListItemTitle class="item-name">{{ item.name }}</div>
+                    <div matListItemLine class="item-details">
+                      Qty: {{ item.quantity }} × ${{ item.price }}
+                    </div>
+                    <div matListItemMeta class="item-total">
+                      ${{ getItemTotal(item) | number:'1.2-2' }}
+                    </div>
+                  </mat-list-item>
+                  @if (!$last) {
+                    <mat-divider></mat-divider>
+                  }
+                }
+              </mat-list>
+            </div>
+
+            <!-- Shipping Address -->
+            @if (order.shippingAddress) {
+              <div class="shipping-section">
+                <h3>
+                  <mat-icon>local_shipping</mat-icon>
+                  Shipping Address
+                </h3>
+                <mat-card class="address-card">
+                  <p><strong>{{ order.shippingAddress.fullName }}</strong></p>
+                  <p>{{ order.shippingAddress.addressLine1 }}</p>
+                  @if (order.shippingAddress.addressLine2) {
+                    <p>{{ order.shippingAddress.addressLine2 }}</p>
+                  }
+                  <p>
+                    {{ order.shippingAddress.city }}, 
+                    {{ order.shippingAddress.state }} 
+                    {{ order.shippingAddress.zipCode }}
+                  </p>
+                  <p>{{ order.shippingAddress.country }}</p>
+                </mat-card>
+              </div>
+            }
+
+            <!-- Order Summary -->
+            <div class="order-summary-section">
+              <h3>
+                <mat-icon>account_balance_wallet</mat-icon>
+                Order Summary
+              </h3>
+              <mat-card class="summary-card">
+                <div class="summary-row">
+                  <span>Subtotal:</span>
+                  <span>${{ (order.total * 0.847) | number:'1.2-2' }}</span>
+                </div>
+                <div class="summary-row">
+                  <span>Tax (18%):</span>
+                  <span>${{ (order.total * 0.153) | number:'1.2-2' }}</span>
+                </div>
+                <div class="summary-row">
+                  <span>Shipping:</span>
+                  <span>$50.00</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="summary-row total-row">
+                  <span><strong>Total:</strong></span>
+                  <span class="total-amount"><strong>${{ order.total | number:'1.2-2' }}</strong></span>
+                </div>
+              </mat-card>
+            </div>
+
+            <!-- Actions -->
+            <div class="order-actions">
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="viewOrderDetails(order)">
+                <mat-icon>visibility</mat-icon>
+                View Details
+              </button>
+              
+              @if (order.status === 'shipped' || order.status === 'processing') {
+                <button 
+                  mat-stroked-button 
+                  color="primary" 
+                  (click)="trackOrder(order)">
+                  <mat-icon>location_on</mat-icon>
+                  Track Order
+                </button>
+              }
+              
+              @if (order.status === 'delivered') {
+                <button 
+                  mat-stroked-button 
+                  (click)="reorder(order)">
+                  <mat-icon>refresh</mat-icon>
+                  Reorder
+                </button>
+              }
+            </div>
+          </div>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  }
+</div>
